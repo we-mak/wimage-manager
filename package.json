@@ -1,0 +1,16 @@
+{
+  "name": "myface-onface",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "gulp": "latest",
+    "gulp-swig": "latest",
+    "gulp-substituter": "latest",
+    "gulp-connect": "latest",
+    "gulp-less": "latest",
+    "del": "latest"
+  },
+  "devDependencies": {
+    "gulp-util": "^3.6.0"
+  }
+}
