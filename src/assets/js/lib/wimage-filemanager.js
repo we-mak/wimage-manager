@@ -1,8 +1,9 @@
 /*
  * =====================================================
  * File Manager
- * Created by Son Dang @we-mak.com
- * Helped from Bruce Doan https://github.com/rgv151
+ * Sean 
+ * Bruce Doan https://github.com/rgv151
+ * Luanphan1994 
  * Version 0.1 WIP - 15 April 2016
  * =====================================================
  */
@@ -327,7 +328,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 setSVGAtts(el, atts);
                 return el;
               },
-              //selectables = document.querySelectorAll('[data-selectable]'),
               selectables = document.getElementById('list'),
               startX, startY, deltaX, deltaY, transX, transY, rafID;
 
@@ -504,6 +504,40 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                              del: '<i class="fa fa-trash"></i>'
                            }
           };
+
+          // Type of menu
+          //To do: variables menu 
+          // var cMenuTemp = function() {
+          //   var clickTo = document.getElementById("list");
+          //   clickTo.addEventListener("click",function() {
+          //     if (e.target) {
+          //       var target = false;
+          //       if (e.target.matches("div.wimage-thumbnail-wrapper")) {
+          //         target = e.target;
+          //       } else {
+          //         target = find("div.wimage-thumbnail-wrapper", e.target);
+          //       }
+          //       if (!target) {
+          //         return;
+          //       }
+          //     }
+          //   });
+          // };
+          // switch (cMenuTemp) {
+          //   case "general": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"<li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>'); 
+          //   break;
+          //   case "folder": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">'  + cMenuIcons.folder.explore + cMenuTitle.folder.explore +'</button></li><li><button class="context-menu-item-button">' + cMenuIcons.folder.editName + cMenuTitle.folder.editName + '</button><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.folder.del + cMenuTitle.folder.del + '</button></li></li></menu>');
+          //   break;
+          //   case "image": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>');
+          //   break;
+          //   default: ""
+          // }
+
+          document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upload + cMenuTitle.default.upload + '</button></li></menu>'); 
+          
+          var taskItemClassName = "wimage-content", 
+              taskItemInContext;
+
           var cMenuClassName = "context-menu", 
               cMenuItemClassName = "context-menu-item", 
               cMenuButtonClassName = "context-menu-item-button",
@@ -511,10 +545,10 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
           var clickCoords,
               clickCoordsX,
-              clickCoorsY;
+              clickCoordsY;
 
           var menu = document.getElementById('contextMenu'),
-              menuItems = menu.querySelector('.context-menu-item'),
+              menuItems = menu.querySelectorAll('.context-menu-item'),
               menuState = 0,
               menuWidth,
               menuHeight,
@@ -524,25 +558,15 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               windowWidth,
               windowHeight;
 
-          var cMenuTemplate = {
-                              general: '<menu class="context-menu dropdown-menu" id="contextMenu"<li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' 
-                                       + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>',
-                              folder: '<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">'  + cMenuIcons.folder.explore + cMenuTitle.folder.explore +'</button></li><li><button class="context-menu-item-button">' 
-                                      + cMenuIcons.folder.editName + cMenuTitle.folder.editName + '</button><li class="context-menu-item"><button class="context-menu-item-button"' 
-                                      + cMenuIcons.folder.del + cMenuTitle.folder.del + '</button></li></li></menu>',
-                              image: '<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button"' 
-                                     + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>'
-          }; 
-          // Type of menu
-          function cMenuTemp() {
-
+          function init() {
+            contextListener();
+            clickListener();
+            keyupListener();
+            resizeListener();
           }
           // Listens for context menu event
           function contextListener() {
-            cMenuTemp();
             document.addEventListener('contextmenu', function(e) {
-              var taskItemClassName,
-                  taskItemInContext;
               taskItemInContext = clickInsideElement(e, taskItemClassName);
               if (taskItemInContext) {
                 e.preventDefault();
@@ -588,7 +612,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           // Show menu 
           function toggleMenuOn() {
             if (menuState !== 1) {
-              menuState = 0;
+              menuState = 1;
               menu.classList.add(cMenuActive);
             }
           }
@@ -630,8 +654,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             toggleMenuOff();
           }
 
+          init();
         }
-        //contextMenu();
+        contextMenu();
 
         /*
         * -------------

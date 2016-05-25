@@ -2357,10 +2357,27 @@ rect {
   height: 5px;
   width: 0;
 }
-.contextMenu {
+.context-menu {
   position: absolute;
   z-index: 10;
   display: none;
+}
+.context-menu li button {
+  text-align: left;
+  padding: 5px 15px;
+  width: 100%;
+  border: none;
+  background: transparent;
+}
+.context-menu li button i {
+  padding-right: 8px;
+}
+.context-menu li button:hover {
+  background-color: #E1E1E1;
+  color: #000;
+}
+.context-menu li button:focus {
+  outline: none;
 }
 .show-context-menu {
   display: block;

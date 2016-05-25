@@ -59,7 +59,10 @@ Please join with me if you have time.
 # Authors 
 
 #####we-mak 
-- son.dang@doda100.com
+- sean https://github.com/viiiprock
+- rgv151 https://github.com/rgv151
+- luan https://github.com/luanphan1994
+
 
 
 # License 
