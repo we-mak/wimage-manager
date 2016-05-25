@@ -160,10 +160,27 @@ rect {
     }
 }
 // context menu 
-.contextMenu {
+.context-menu {
     position: absolute;
     z-index: 10;
     display: none;
+    li button {
+        text-align: left;
+        padding: 5px 15px;   
+        width: 100%;
+        border: none;
+        background: transparent;
+        i {
+            padding-right: 8px;
+        }
+        &:hover {
+            background-color: @w-lightGray;
+            color: #000;
+        }
+        &:focus {
+            outline: none;
+        }
+    }
 }
 .show-context-menu {
     display: block;
