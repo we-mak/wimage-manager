@@ -48,7 +48,8 @@ Please join with me if you have time.
 
 ### In progress 
 - Selectable: click to select, multiple drag select, keyboard select.
-- Rightclick context menu
+- Multiple right click context menu
+- Apply action in context menu 
 
 ### Bugs
 - Selected item not remove select when click/drag outside the item. 

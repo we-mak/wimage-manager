@@ -328,7 +328,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 setSVGAtts(el, atts);
                 return el;
               },
-              selectables = document.getElementById('list'),
+              //selectables = document.getElementById('list'),
               startX, startY, deltaX, deltaY, transX, transY, rafID;
 
           var content = document.querySelector('.wimage-content'),
@@ -345,7 +345,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           function findSelectables() { 
             var a = svg.getBoundingClientRect();
             //delegate event 
-            selectables.getBoundingClientRect(function(e) {
+            content.getBoundingClientRect(function(e) {
               if (e.target) {
                 var b = target.getBoundingClientRect();
                 if(isColliding(a, b)) {
@@ -361,19 +361,17 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
           }
           // delegate event to listen for click. 
-          selectables.addEventListener('click', function selectableClickHandler(e) {
+          content.addEventListener('click', function selectableClickHandler(e) {
             if (e.target) {
               var target = false;
               if (e.target.matches("div.wimage-thumbnail-wrapper")) {
                 target = e.target;
               } else {
-                target = find("div.wimage-thumbnail-wrapper", e.target);
-                
-                var file_seleced = document.getElementsByClassName("wimage-thumbnail-wrapper");
-                for(var i = 0; i < file_seleced.length; i++){
-                  file_seleced[i].classList.remove('file-selected');
-                }
-                
+                target = find("div.wimage-thumbnail-wrapper", e.target);               
+                var file_selected = document.getElementsByClassName("wimage-thumbnail-wrapper");
+                for(var i = 0; i < file_selected.length; i++){
+                  file_selected[i].classList.remove('file-selected');
+                }              
               }
               if (!target) {
                 return;
