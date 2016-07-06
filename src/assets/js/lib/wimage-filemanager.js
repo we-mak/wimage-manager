@@ -687,5 +687,3 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
     window.WimageFilemanager;
 
 })();
-
-
