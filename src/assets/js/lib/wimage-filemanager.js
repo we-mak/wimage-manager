@@ -16,15 +16,22 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
 (function() {
     "use strict";
+
+    function dump(a){
+      console.log(a);
+    }
+
     var WimageFilemanager = (function() { 
         /* General variables */
         var defaults = {
             url: '',//for backend API connector
             lang: '',
-            maxFileUpload: '25',
-            maxSizeUpload: '',
+            maxFileUpload: '15',
+            maxSizeUpload: '10mb',
+            mimeType: ["image/jpeg","image/gif","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
         },
+
         temp = {
             gridView: '',
             listView: '',
@@ -97,59 +104,62 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         //Filter 
         // Looking for child element in depth
         function findChild(parent, child) {
-          var children = parent.childNodes;
-          for (var i = 0; i < children.length; i++) {
-            if (children[i] == child) {
-              return true;
-            } else if (findChild(children[i], child)) {
-              return true;
+            var children = parent.childNodes;
+            var l = children.length;
+            for (var i = 0; i < l; i++) {
+                if (children[i] == child) {
+                    return true;
+                } else if (findChild(children[i], child)) {
+                    return true;
+                }
             }
-          }
-          return false;
-        }    
+            return false;
+        }
         // Find the exactly child    
         function find(selector, elem) {
-          var matches = document.querySelectorAll(selector);
-          for (var i = 0; i < matches.length; i++) {
-            if (findChild(matches[i], elem)) {
-              return matches[i];
+            var matches = document.querySelectorAll(selector);
+            var l = matches.length;
+            for (var i = 0; i < l; i++) {
+                if (findChild(matches[i], elem)) {
+                    return matches[i];
+                }
             }
-          }
           return false;
         }
 
         //Function to check if we clicked inside an element with a particular class name
         function clickInsideElement( e, className ) {
-          var el = e.srcElement || e.target; 
-          if ( el.classList.contains(className) ) {
-            return el;
-          } else {
-            while ( el = el.parentNode ) {
-              if ( el.classList && el.classList.contains(className) ) {
+            var el = e.srcElement || e.target;
+            if (el.classList.contains(className)){
                 return el;
-              }
             }
-          }
-          return false;
+            else {
+                while ( el = el.parentNode ) {
+                    if ( el.classList && el.classList.contains(className) ) {
+                        return el;
+                    }
+                }
+            }
+            return false;
         }
         // Get's exact position of event.
         function getPosition(e) {
-          var posx = 0;
-          var posy = 0;
-
-          if (!e) var e = window.event;
-          
-          if (e.pageX || e.pageY) {
-            posx = e.pageX;
-            posy = e.pageY;
-          } else if (e.clientX || e.clientY) {
-            posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-          }
-          return {
-            x: posx,
-            y: posy
-          }
+            var posx = 0;
+            var posy = 0;
+            if (!e)
+                var e = window.event;
+            if (e.pageX || e.pageY) {
+                posx = e.pageX;
+                posy = e.pageY;
+            }
+            else if (e.clientX || e.clientY) {
+                posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            }
+            return {
+                x: posx,
+                y: posy
+            }
         }
 
         /*
@@ -195,26 +205,30 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * -----------
         * re-contribute from http://www.html5rocks.com/en/tutorials/file/dndfiles
         */
+       
+      
         function upLoad() {
-          var reader,
-              progress = document.querySelector('.percent');
-          function abortRead() {
-            reader.abort();
-          }
-          function errorHandler(evt) {
-            switch(evt.target.error.code) {
-              case evt.target.error.NOT_FOUND_ERR:
-                alert('File Not Found!');
-                break;
-              case evt.target.error.NOT_READABLE_ERR:
-                alert('File is not readable');
-                break;
-              case evt.target.error.ABORT_ERR:
-                break; // noop
-              default:
-                alert('An error occurred reading this file.');
-            };
-          }
+            var reader,
+                progress = document.querySelector('.percent');
+            function abortRead() {
+                reader.abort();
+            }
+            function errorHandler(evt) {
+                switch(evt.target.error.code) {
+                    case evt.target.error.NOT_FOUND_ERR:
+                        alert('File Not Found!');
+                        break;
+                    case evt.target.error.NOT_READABLE_ERR:
+                        alert('File is not readable');
+                        break;
+                    case evt.target.error.ABORT_ERR:
+                        break; // noop
+                    default:
+                        alert('An error occurred reading this file.');
+                };
+            }
+
+
           function updateProgress(evt) {
             // evt is an ProgressEvent.
             if (evt.lengthComputable) {
@@ -226,17 +240,62 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               }
             }
           }
+
+          // validate is image and limit mime type
+          function validateType(file,mimes){
+            var valid = file.type.match("image.*");
+            if(valid){
+              if(mimes === ""){
+                return true;
+              }
+              var mime = valid.input;
+              var l = mimes.length;
+              for(var i = 0 ; i < l ; i++){
+                if(mimes[i] === mime)
+                  return true;
+              }
+            }
+            return false;
+          }
+
+          function getSize(size){
+            if(size){
+              var tail = size.substr(-2,2);
+              tail = tail.toLowerCase();
+              var temp = size.substr(0,size.length - 2);
+              var tempSize = parseInt(temp);
+              switch(tail){
+                case "kb":{
+                  return temp*1024;
+                }break;
+                case "mb":{
+                  return temp*1024*1024;
+                }break;
+                default:
+                  return 1024*1024;
+              }
+            }
+            return 1024*1024;
+          }
+
+          function validateSize(file,size){
+            return (file.size <= size);
+          }
+
           function handleFileSelect(evt) {
               "use strict";
               evt.stopPropagation();
               evt.preventDefault();
               var files = evt.target.files; // FileList object
               // Loop through the FileList and render image files as thumbnails.
-              for (var i = 0, f; f = files[i]; i++) {
+              var numberFile = files.length;
+              numberFile = (numberFile <= defaults.maxFileUpload) ? numberFile : defaults.maxFileUpload;
+              for (var i = 0; i < numberFile ; i++) {
                 // Only process image files.
-                if (!f.type.match('image.*')) {
+                var fileSize = getSize(defaults.maxSizeUpload);
+                if (!validateSize(files[i],fileSize) || !validateType(files[i],defaults.mimeType)){
                   continue;
-                } 
+                }
                 // Reset progress indicator on new file selection.
                 progress.style.width = '0%';
                 progress.textContent = '0%';
@@ -265,9 +324,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                                       + '</div>'].join('');
                     document.getElementById('list').insertBefore(span, null);               
                   };
-                })(f);
+                })(files[i]);
                 // Read in the image file as a data URL.
-                reader.readAsDataURL(f);
+                reader.readAsDataURL(files[i]);
               }
           }
           var file = document.getElementById('file');
@@ -279,18 +338,18 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * create folder 
         * -------------
         */
-        function createFolder() {
+        function createFolder(id) {
           "use strict";
           var folderIcon = '<div class="folder-icon"></div>',
-              create = document.getElementById('createFolder'),
+              create = document.getElementById(id),
               fileCount = 0;
           //create element when click the button.
           create.addEventListener('click', function(e) {
             "use strict";
             e.stopPropagation();
             e.preventDefault();
-            function fileName(folderName) {
-              folderName = "Album";
+            function fileName() {
+              var folderName = "Album";
               var fileUp = fileCount++;
               //generate number of folder's default name
               if (fileUp === 0) {
@@ -304,7 +363,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             document.getElementById('list').insertBefore(folder, null); 
           });
         }
-        createFolder();
+        createFolder('createFolder');
         /*
         * -------------
         * select files 
@@ -360,6 +419,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           function isColliding(a, b) {
             return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
           }
+          
           // delegate event to listen for click. 
           content.addEventListener('click', function selectableClickHandler(e) {
             if (e.target) {
@@ -531,7 +591,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           //   default: ""
           // }
 
-          document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upload + cMenuTitle.default.upload + '</button></li></menu>'); 
+          document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upload + cMenuTitle.default.upload + '</button></li></menu>');
           
           var taskItemClassName = "wimage-content", 
               taskItemInContext;
