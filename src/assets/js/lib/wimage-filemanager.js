@@ -191,7 +191,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 html_init = html_init + '</div></div>';
 
                 //content
-                html_init = html_init + '<div class="wimage-content"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="list"></output></div>';
+                html_init = html_init + '<div class="wimage-content" id="main"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="list"></output></div>';
 
                 html_init = html_init + '</div>';
 
@@ -314,7 +314,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     // Ensure that the progress bar displays 100% at the end.
                     progress.style.width = '100%';
                     progress.textContent = '100%';
-                    setTimeout("document.getElementById('progress_bar').className='';", 2000);
+                    setTimeout("document.getElementById('progress_bar').className='';", 1200);
                     // Rendering thumbnail.
                     var span = document.createElement('span');
                     span.innerHTML = [
@@ -369,159 +369,234 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * select files 
         * -------------
         */
+        var globalBody = document.getElementsByClassName("wimage-group")[0];
         function selectFile() {
-          //key code for cmd/ctrl click, shift click
-          var cmd = 91, ctrl = 17, shift = 16;
-          // SVG Helper
-          var setSVGAtts = function (el, atts) {
-                if (atts !== undefined) {
-                  for (var k in atts) {
-                    el.setAttributeNS(null, k, atts[k]);
-                  }
-                }
-              return el;
-              },
-              createSVG = function (tag, atts) {
-                var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-                // set SVG attributes
-                setSVGAtts(el, atts);
-                return el;
-              },
-              //selectables = document.getElementById('list'),
-              startX, startY, deltaX, deltaY, transX, transY, rafID;
 
-          var content = document.querySelector('.wimage-content'),
-              svg = createSVG('svg', { viewBox: '0 0 0 0', width: 0, height: 0 }),
-              rect = createSVG('rect', { width: '100%', height: '100%' }),
-              isDragging = false;
-
-          // add rect to svg
-          svg.appendChild(rect);
-          // add svg to DOM
-          content.appendChild(svg);
-
-          // checks if anything is selected within set of x and y ranges
-          function findSelectables() { 
-            var a = svg.getBoundingClientRect();
-            //delegate event 
-            content.getBoundingClientRect(function(e) {
-              if (e.target) {
-                var b = target.getBoundingClientRect();
-                if(isColliding(a, b)) {
-                  target.classList.add('file-selected');
-                } else {
-                  target.classList.remove('file-selected');
-                }
-              }
-            });
-          }
-          //checks if two elements are colliding
-          function isColliding(a, b) {
-            return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
-          }
-          
-          // delegate event to listen for click. 
-          content.addEventListener('click', function selectableClickHandler(e) {
-            if (e.target) {
-              var target = false;
-              if (e.target.matches("div.wimage-thumbnail-wrapper")) {
-                target = e.target;
-              } else {
-                target = find("div.wimage-thumbnail-wrapper", e.target);               
-                var file_selected = document.getElementsByClassName("wimage-thumbnail-wrapper");
-                for(var i = 0; i < file_selected.length; i++){
-                  file_selected[i].classList.remove('file-selected');
-                }              
-              }
-              if (!target) {
-                return;
-              }
+            function dump(a){
+                console.log(a);
             }
-            if (!isDragging) {
-              //remove selected class from all selectables
-              if (target.classList.contains('file-selected')) {
-                target.classList.remove('file-selected');
-              } else {
-                target.classList.add('file-selected');
-              }
-            }       
-          });
 
-          function updateDragSelectBoxPos(e) {        
-            var width = deltaX || 0,
-                height = deltaY || 0;
-            
-            // set position of SVG
-            svg.style.transform = 'translate('+ transX +'px, '+ transY +'px)';
-            
-            // svg width / height
-            setSVGAtts(svg, {
-                viewBox: '0 0 '+ width +' '+ height,
-                width: width,
-                height: height
-            });
-            
-            // do we need to update
-            if(isDragging) {
-              rafID = requestAnimationFrame(updateDragSelectBoxPos);
+            //set attributes for SVG
+            function setAttribute(el,attr){
+                for(var i in attr){
+                    el.setAttributeNS(null,i,attr[i]);
+                }
             }
-          }
-          function dragStart(e) {      
-            // get starting coords
-            startX = e.pageX;
-            startY = e.pageY;
-            
-            // add helper styling class
-            content.classList.add('dragging');
-            
-            // listen for drag and release
-            content.addEventListener('mousemove', dragMove);
-            content.addEventListener('mouseup', dragUp);
-            
-            // start animating
-            rafID = requestAnimationFrame(updateDragSelectBoxPos);
-            
-            // dragging
-            isDragging = true;
-          }
-          function dragMove(e) {
-              
-             // get current relative to start coords
-            deltaX = Math.abs(e.pageX - startX);
-            deltaY = Math.abs(e.pageY - startY);
-            
-            // check if we need to move position
-            transX = (startX > e.pageX) ? (startX - deltaX) : startX;
-            transY = (startY > e.pageY) ? (startY - deltaY) : startY;
-          }
+            // craate SVG element
+            function createSVG(tag,attr){
+                var ns = "http://www.w3.org/2000/svg";
+                var svg = document.createElementNS(ns,tag);
+                var rect = document.createElementNS(ns,"rect");
+                setAttribute(rect,{width: "100%",height: "100%"});
+                setAttribute(svg,attr);
+                svg.appendChild(rect);
+                return svg;
+            }
 
-          function dragUp(e) {
-              
-            // stopped dragging
-            isDragging = false;
-            
-            // check if we selected anything
-            findSelectables();
-            
-            // clear current animation
-            cancelAnimationFrame(rafID);
-            
-            // reset atts on release
-            deltaX =
-            deltaY = 0;
-            setSVGAtts(svg, { viewBox: '0 0 0 0', width: 0, height: 0 });
-            
-            // remove helper styling class
-            content.classList.remove('dragging');
-            
-            content.removeEventListener('mousemove', dragMove);
-            content.removeEventListener('mouseup', dragUp);
-          }
+            // get current Pointer
+            function getPointer(event){
+                event = (event) ? event : window.event;
+                var body = document.body;
+                var tempX = event.pageX - body.scrollLeft;
+                var tempY = event.pageY - body.scrollTop;
+                return {x: tempX,y: tempY};
+            }
 
-          // listen for drag start
-          content.addEventListener('mousedown', dragStart);
+            var attr = {width: 0,height: 0,viewBox: "0 0 0 0"};
+            var svg = createSVG("svg",attr);
+            var main = document.getElementById("main");
+            main.appendChild(svg);
+            var startPoint;
+            // wrap 
+            function move(event){
+                findSelect();
+                event = (event) ? event : window.event;
+                // get movement pointer
+                var mX = parseInt(event.movementX);
+                var mY = parseInt(event.movementY);
+
+                // translate
+                var transX = startPoint.x;
+                var transY = startPoint.y;
+
+                // get current point
+                var currentPoint = getPointer();
+                
+                // start point except current point
+                var deltaX = startPoint.x - currentPoint.x;
+                var deltaY = startPoint.y - currentPoint.y;
+
+                var style = getComputedStyle(svg);          
+                // move translate
+                if(deltaX > 0){
+                    transX = currentPoint.x ;
+                    mX = -mX;
+                }
+                if(deltaY > 0){
+                    transY = currentPoint.y;
+                    mY = -mY;
+                }
+                // get width, heigth will inscrease or decrease
+                var w = parseInt(style.width) + mX;
+                var h = parseInt(style.height) + mY;
+
+                // + Chỉ resize
+                //  -> di chuyển tới và di chuyển lui cả 2 chiều 
+                //      và
+                //  -> điểm hiện tại lớn hơn điểm ban đầu
+                //      -> resize lớn khi di chuyển tới, nhỏ khi di chuynể lùi
+                // + Resize và chuyển translate
+                //  -> di chuyển lui 1 trong 2 chiều
+                
+                var attr = {width: w,height: h, viewBox: "0 0 " + w + " " + h};
+                svg.style.transform = "translate(" + transX + "px, " + transY + "px)";
+                setAttribute(svg,attr);
+            }
+
+            function isColliding(a,b){
+                return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
+            }
+
+            function addSelect(img){
+                img.classList.add("file-selected");
+                img.nextSibling.classList.add("file-selected-name");
+            }
+
+            function removeSelect(img){
+                img.classList.remove("file-selected");
+                img.nextSibling.classList.remove("file-selected-name");
+            }
+
+            function findSelect(){
+                var rect = document.getElementsByClassName("wimage-thumbnail-wrapper");    
+                var posSVG = svg.getBoundingClientRect();
+                var l = rect.length;
+                for(var i = l ;i--;){
+                    var posRect = rect[i].getBoundingClientRect();
+                    if(isColliding(posSVG,posRect)){
+                        addSelect(rect[i]);
+                    }else{
+                       removeSelect(rect[i]);
+                    }
+                }
+            }
+            
+            function resetSelected(){
+                var listE = document.getElementsByClassName("file-selected");
+                var length  = listE.length;
+                for(var i= length ; i-- ;){
+                    removeSelect(listE[i]);
+                }
+            }
+
+            function findSelected(target){
+                var classList = target.classList;
+                if(classList.contains("wimageThumbnail")){
+                    return target.parentNode;
+                }
+                if(classList.contains("ellipsis")){
+                    return target.previousSibling;
+                }
+                if(classList.contains("wimage-thumbnail-wrapper")){
+                    return target;
+                }
+                return null;
+            }
+
+            main.addEventListener("mousedown",function(event){
+                startPoint = getPointer(event);
+                svg.style.transform = "translate(" + startPoint.x + "px, " + startPoint.y + "px)";
+                main.classList.add("wimage-content-active");
+                main.addEventListener("mousemove",move); 
+
+                main.addEventListener("mouseup",function(event){
+                    setAnimaitonOff();
+                });
+
+                main.addEventListener("mouseleave",function(event){
+                    setAnimaitonOff();
+                }); 
+                // reset selected when mouse down
+                resetSelected();
+
+                function setAnimaitonOff(){
+                    var attr = {width: 0,height: 0,viewBox: "0 0 0 0"};
+                    setAttribute(svg,attr);
+                    main.classList.remove('wimage-content-active');
+                    main.removeEventListener("mousemove",move);
+                }
+
+            });
+
+            function clickHandler(){
+                main.addEventListener('click',function(e){
+                    var target = findSelected(e.target);   
+                    if(target){
+                       addSelect(target);
+                    }            
+                });
+            }
+            clickHandler();
+
+            var keyboard = {
+                detectKeyboard: function(event){
+                    event = (event) ? event : window.event;
+                    if(event.ctrlKey){
+                        switch(event.keyCode){
+                            case 65: return "ctrlA";
+                            case 67: return "ctrlC";
+                            case 86: return "ctrlV";
+                            case 88: return "ctrlX"; 
+                            case 90: return "ctrlZ";  
+                        }
+                    }else{
+                        switch(event.keyCode){
+                            case 46: return "delete"; 
+                        } 
+                    }
+                    return null;
+                }
+            };
+
+            function addMultiSelect(target,length){
+                for(var i = length ; i-- ;){
+                    addSelect(target[i]);
+                }
+            }
+
+            document.addEventListener("keydown",function(){
+                var body = document.body;
+                body.classList.add("non-select");
+                var selectables = document.getElementsByClassName("wimage-thumbnail-wrapper");
+                var length = selectables.length;
+                
+                switch(keyboard.detectKeyboard()){
+                    case "ctrlA":{       
+                        addMultiSelect(selectables,length);
+                    }break;
+                    case "delete":{
+
+                    }break;
+                }
+
+                document.addEventListener("keyup",function(){
+                    body.classList.remove("non-select");
+                });
+
+            });
+
+
         }
+
         selectFile();
+
+        /*
+        * -------------
+        * Keyboard event 
+        * -------------
+        */
+  
+
         /*
         * -------------
         * context menu 
@@ -637,7 +712,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             });
           }
           // Listens for click event: click into item on menu 
-          function clickListener() {
+        function clickListener() {
             document.addEventListener('click', function(e) {
               var clickElemButton = clickInsideElement(e, cMenuButtonClassName);
               if (clickElemButton) {
@@ -650,39 +725,39 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
               }
             });
-          }
+        }
           // Listens for keyup event 
           // close menu with escape key
-          function keyupListener() {
+        function keyupListener() {
             window.onkeyup = function(e) {
               if (e.keyCode === 27) {
                 toggleMenuOff();
               }
             }
-          }
+        }
           // window resize event 
           // close menu when resize window 
-          function resizeListener() {
+        function resizeListener() {
             window.onresize = function(e) {
               toggleMenuOff();
             };
-          }
+        }
           // Show menu 
-          function toggleMenuOn() {
+        function toggleMenuOn() {
             if (menuState !== 1) {
               menuState = 1;
               menu.classList.add(cMenuActive);
             }
-          }
+        }
           // Turn off menu 
-          function toggleMenuOff() {
+        function toggleMenuOff() {
             if (menuState !== 0) {
               menuState = 0;
               menu.classList.remove(cMenuActive);
             }
-          }
+        }
           // Menu position
-          function positionMenu(e) {
+        function positionMenu(e) {
             clickCoords = getPosition(e);
             clickCoordsX = clickCoords.x;
             clickCoordsY = clickCoords.y;
@@ -704,7 +779,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             } else {
               menu.style.top = clickCoordsY + 'px';
             }
-          }
+        }
           // Listen for item clicked
           // to do: apply function to context menu 
           // close menu after click 

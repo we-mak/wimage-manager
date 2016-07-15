@@ -36,6 +36,11 @@
     cursor: default;
     min-height: 450px;
 }
+
+.wimage-content-active{
+   .user-select();
+}
+
 .wimage-input-style-group {
     display: inline-block;
     padding-right: 5px;
@@ -125,6 +130,15 @@
 .file-selected {
     background-color: @w-lightGray;
 }
+.file-selected-name{
+    .rounded(4px);
+    background: @w-lightGray;
+}
+
+.non-select{
+    .user-select();
+}
+
 //mouse drag 
 svg {
   position: fixed;
