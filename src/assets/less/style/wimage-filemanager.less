@@ -3,6 +3,11 @@
  * --------------------
  */
 
+*{
+    padding: 0px;
+    margin: 0px;
+}
+
 .wimage-group {
   background-color: #fff;
   .navbar {
@@ -31,6 +36,7 @@
     }
   }
 }
+
 .wimage-content {
     padding: 0 5px 5px;
     cursor: default;
@@ -72,6 +78,7 @@
         display: inline-block;
         position: relative;
         margin: 5px;
+        overflow: hidden;
         .wimage-thumbnail-wrapper {
             width: 60px;
             height: 60px;
@@ -119,11 +126,23 @@
                 .bordered(@w-lightGray, @w-lightGray, @w-lightGray, @w-lightGray);
             }
         }
-        #wimage-filename {
+        .ellipsis{
             font-size: 10px;
             width: 60px;
             padding-top: 5px;
             text-align: center;
+        }
+
+        .wimage-thumbnail-wrapper-list{
+            display: inline-block;
+        }
+
+        .list-name{
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 1em;
+            text-align: left;
+            width: 200px;
         }
     } 
 }
