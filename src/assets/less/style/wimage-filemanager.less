@@ -3,6 +3,11 @@
  * --------------------
  */
 
+*{
+    padding: 0px;
+    margin: 0px;
+}
+
 .wimage-group {
   background-color: #fff;
   .navbar {
@@ -31,11 +36,17 @@
     }
   }
 }
+
 .wimage-content {
     padding: 0 5px 5px;
     cursor: default;
     min-height: 450px;
 }
+
+.wimage-content-active{
+   .user-select();
+}
+
 .wimage-input-style-group {
     display: inline-block;
     padding-right: 5px;
@@ -67,6 +78,7 @@
         display: inline-block;
         position: relative;
         margin: 5px;
+        overflow: hidden;
         .wimage-thumbnail-wrapper {
             width: 60px;
             height: 60px;
@@ -114,17 +126,38 @@
                 .bordered(@w-lightGray, @w-lightGray, @w-lightGray, @w-lightGray);
             }
         }
-        #wimage-filename {
+        .ellipsis{
             font-size: 10px;
             width: 60px;
             padding-top: 5px;
             text-align: center;
+        }
+
+        .wimage-thumbnail-wrapper-list{
+            display: inline-block;
+        }
+
+        .list-name{
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 1em;
+            text-align: left;
+            width: 200px;
         }
     } 
 }
 .file-selected {
     background-color: @w-lightGray;
 }
+.file-selected-name{
+    .rounded(4px);
+    background: @w-lightGray;
+}
+
+.non-select{
+    .user-select();
+}
+
 //mouse drag 
 svg {
   position: fixed;
@@ -184,4 +217,28 @@ rect {
 }
 .show-context-menu {
     display: block;
+}
+
+.wimage-path{
+    box-sizing: border-box;
+    height: 30px;
+    border-bottom: 1px solid @w-gray;
+    vertical-align: middle;
+    font-size: 1.2em;
+    font-style: italic;
+    color: #A9A9A9;
+    display: flex;
+   
+    align-items: center; /* align vertical */
+    i {    
+        font-size: 1.3em;
+        margin-left: 25px;
+    }
+
+    span.wimage-back-slash {
+        font-size: 1.3em;
+        color: #666;
+        font-style: italic;
+        display: none;
+    }
 }

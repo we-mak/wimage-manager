@@ -2180,6 +2180,10 @@ footer {
  * wimageFilemanager style
  * --------------------
  */
+* {
+  padding: 0px;
+  margin: 0px;
+}
 .wimage-group {
   background-color: #fff;
 }
@@ -2227,6 +2231,12 @@ footer {
   cursor: default;
   min-height: 450px;
 }
+.wimage-content-active {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 .wimage-input-style-group {
   display: inline-block;
   padding-right: 5px;
@@ -2260,6 +2270,7 @@ footer {
   display: inline-block;
   position: relative;
   margin: 5px;
+  overflow: hidden;
 }
 .wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper {
   width: 60px;
@@ -2313,14 +2324,36 @@ footer {
   border-right: solid 1px #E1E1E1;
   border-bottom: solid 1px #E1E1E1;
 }
-.wimage-file-group .wimage-thumbnail-group #wimage-filename {
+.wimage-file-group .wimage-thumbnail-group .ellipsis {
   font-size: 10px;
   width: 60px;
   padding-top: 5px;
   text-align: center;
 }
+.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper-list {
+  display: inline-block;
+}
+.wimage-file-group .wimage-thumbnail-group .list-name {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 1em;
+  text-align: left;
+  width: 200px;
+}
 .file-selected {
   background-color: #E1E1E1;
+}
+.file-selected-name {
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+  background: #E1E1E1;
+}
+.non-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 svg {
   position: fixed;
@@ -2381,6 +2414,28 @@ rect {
 }
 .show-context-menu {
   display: block;
+}
+.wimage-path {
+  box-sizing: border-box;
+  height: 30px;
+  border-bottom: 1px solid #CDCDCD;
+  vertical-align: middle;
+  font-size: 1.2em;
+  font-style: italic;
+  color: #A9A9A9;
+  display: flex;
+  align-items: center;
+  /* align vertical */
+}
+.wimage-path i {
+  font-size: 1.3em;
+  margin-left: 25px;
+}
+.wimage-path span.wimage-back-slash {
+  font-size: 1.3em;
+  color: #666;
+  font-style: italic;
+  display: none;
 }
 header {
   width: 100%;

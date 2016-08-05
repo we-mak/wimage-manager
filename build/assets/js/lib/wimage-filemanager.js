@@ -1,8 +1,9 @@
 /*
  * =====================================================
  * File Manager
- * Created by Son Dang @we-mak.com
- * Helped from Bruce Doan https://github.com/rgv151
+ * Sean 
+ * Bruce Doan https://github.com/rgv151
+ * Luanphan1994 
  * Version 0.1 WIP - 15 April 2016
  * =====================================================
  */
@@ -15,15 +16,22 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
 (function() {
     "use strict";
+
+    function dump(a){
+      console.log(a);
+    }
+
     var WimageFilemanager = (function() { 
         /* General variables */
         var defaults = {
             url: '',//for backend API connector
             lang: '',
-            maxFileUpload: '25',
-            maxSizeUpload: '',
+            maxFileUpload: '15',
+            maxSizeUpload: '10mb',
+            mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
         },
+
         temp = {
             gridView: '',
             listView: '',
@@ -96,59 +104,172 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         //Filter 
         // Looking for child element in depth
         function findChild(parent, child) {
-          var children = parent.childNodes;
-          for (var i = 0; i < children.length; i++) {
-            if (children[i] == child) {
-              return true;
-            } else if (findChild(children[i], child)) {
-              return true;
+            var children = parent.childNodes;
+            var l = children.length;
+            for (var i = 0; i < l; i++) {
+                if (children[i] == child) {
+                    return true;
+                } else if (findChild(children[i], child)) {
+                    return true;
+                }
             }
-          }
-          return false;
-        }    
+            return false;
+        }
         // Find the exactly child    
         function find(selector, elem) {
-          var matches = document.querySelectorAll(selector);
-          for (var i = 0; i < matches.length; i++) {
-            if (findChild(matches[i], elem)) {
-              return matches[i];
+            var matches = document.querySelectorAll(selector);
+            var l = matches.length;
+            for (var i = 0; i < l; i++) {
+                if (findChild(matches[i], elem)) {
+                    return matches[i];
+                }
             }
-          }
           return false;
         }
 
         //Function to check if we clicked inside an element with a particular class name
-        function clickInsideElement( e, className ) {
-          var el = e.srcElement || e.target; 
-          if ( el.classList.contains(className) ) {
-            return el;
-          } else {
-            while ( el = el.parentNode ) {
-              if ( el.classList && el.classList.contains(className) ) {
+        function clickInsideElement(e, className ) {
+            var el = e.srcElement || e.target;
+            if (el.classList.contains(className)){
                 return el;
-              }
             }
-          }
-          return false;
+            else {
+                while ( el = el.parentNode ) {
+                    if ( el.classList && el.classList.contains(className) ) {
+                        return el;
+                    }
+                }
+            }
+            return false;
         }
         // Get's exact position of event.
         function getPosition(e) {
-          var posx = 0;
-          var posy = 0;
+            var posx = 0;
+            var posy = 0;
+            if (!e)
+                var e = window.event;
+            if (e.pageX || e.pageY) {
+                posx = e.pageX;
+                posy = e.pageY;
+            }
+            else if (e.clientX || e.clientY) {
+                posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+            }
+            return {
+                x: posx,
+                y: posy
+            }
+        }
 
-          if (!e) var e = window.event;
-          
-          if (e.pageX || e.pageY) {
-            posx = e.pageX;
-            posy = e.pageY;
-          } else if (e.clientX || e.clientY) {
-            posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-            posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-          }
-          return {
-            x: posx,
-            y: posy
-          }
+        /**
+         * Create Popup menu
+         */
+
+        function createPopup(id,contents,buttons){
+            var hugeModal = document.createElement("div");
+            hugeModal.classList.add("modal");
+            hugeModal.classList.add("fade");
+            hugeModal.id = id;
+
+            hugeModal.setAttribute("role", "dialog");
+
+            var parent = document.createElement("div");
+            parent.classList.add("modal-dialog");
+
+            var modalContent = document.createElement("div");
+            modalContent.classList.add("modal-content");
+
+            var bodyContent = document.createElement("div");
+            bodyContent.classList.add("modal-body");
+
+            for(var i in contents){
+                var temp = document.createElement("p");
+                var text = document.createTextNode(contents[i]);
+                temp.appendChild(text);
+                bodyContent.appendChild(temp);
+            }
+
+            var bodyFooter = document.createElement("div");
+            bodyFooter.classList.add("modal-footer");
+            bodyFooter.id = "wimage-modal-confirm";
+
+            for(var i in buttons){
+                var temp = document.createElement("button");
+                temp.setAttribute("type","button");
+                temp.classList.add("btn");
+                temp.classList.add("btn-" + buttons[i].btn);
+                if(buttons[i].id){
+                    temp.id = buttons[i].id;
+                }
+                temp.setAttribute("data-dismiss","modal");
+            
+                var text = document.createTextNode(buttons[i].content);
+                temp.appendChild(text);
+                bodyFooter.appendChild(temp);
+            }
+
+            modalContent.appendChild(bodyContent);
+            modalContent.appendChild(bodyFooter);
+            parent.appendChild(modalContent);
+            hugeModal.appendChild(parent);
+            return hugeModal;
+        }
+
+        function createPopupRename(id,buttons){
+            var hugeModal = document.createElement("div");
+            hugeModal.classList.add("modal");
+            hugeModal.classList.add("fade");
+            hugeModal.id = id;
+
+            hugeModal.setAttribute("role", "dialog");
+
+            var parent = document.createElement("div");
+            parent.classList.add("modal-dialog");
+
+            var modalContent = document.createElement("div");
+            modalContent.classList.add("modal-content");
+
+            var bodyContent = document.createElement("div");
+            bodyContent.classList.add("modal-body");
+            bodyContent.innerHTML = '<input type="text" name="inputFileName" id="nameValue" value="" class="form-control" autofocus/>';
+            var bodyFooter = document.createElement("div");
+            bodyFooter.classList.add("modal-footer");
+            bodyFooter.id = "wimage-modal-confirm";
+            bodyFooter.innerHTML = '<div class="col-md-4" id="wimage-rename-samename" style="visibility:'+ 'hidden' +'">The same name</div>';
+            var tempDiv = document.createElement("div");
+            tempDiv.classList.add('col-md-8');
+            for(var i in buttons){
+                var temp = document.createElement("button");
+                temp.setAttribute("type","button");
+                temp.classList.add("btn");
+                temp.classList.add("btn-" + buttons[i].btn);
+                if(buttons[i].id){
+                    temp.id = buttons[i].id;
+                }
+                temp.setAttribute("data-dismiss","modal");
+            
+                var text = document.createTextNode(buttons[i].content);
+                temp.appendChild(text);
+                tempDiv.appendChild(temp);
+            }
+            bodyFooter.appendChild(tempDiv);
+            modalContent.appendChild(bodyContent);
+            modalContent.appendChild(bodyFooter);
+            parent.appendChild(modalContent);
+            hugeModal.appendChild(parent);
+            return hugeModal;
+        }
+
+        function isMatch(str,className){
+            var allName = document.getElementsByClassName(className);
+            var l = allName.length;
+            for(var i = l ; i--;){
+                var name = allName[i].firstChild.nodeValue;
+                if(name === str)
+                    return true;
+            }
+            return false;
         }
 
         /*
@@ -157,30 +278,33 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * --------------------
         */
         function AppLayout() {
+
+            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
+
             var html_init = '<div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
 
                 //switch view, edit group
                 html_init = html_init + '<div class="col-md-6 col-sm-12 wimage-toolbar-block">'
-                            + '<div class="btn-group"><button class="btn btn-default btn-sm active">' + btnIcon.gridIcon + '</button>' 
-                            + '<button class="btn btn-default btn-sm">' + btnIcon.listIcon + '</button></div>'
-                            + '<div class="btn-group"><button class="btn btn-default btn-sm disabled">' + btnIcon.renameIcon + temp.rename + '</button>'
-                            + '<button class="btn btn-default btn-sm disabled">' + btnIcon.moveIcon + temp.move + '</button>' 
-                            + '<button class="btn btn-default btn-sm disabled">' + btnIcon.deleteIcon + temp.del + '</button></div></div>';  
+                            + '<div class="btn-group"><button id="wimage-btn-grid" type="button"  class="btn btn-default btn-sm active">' + btnIcon.gridIcon + '</button>' 
+                            + '<button id="wimage-btn-list" type="button" class="btn btn-default btn-sm">' + btnIcon.listIcon + '</button></div>'
+                            + '<div class="btn-group"><button id="wimage-btn-rename" type="button" class="btn btn-default btn-sm disabled">' + btnIcon.renameIcon + temp.rename + '</button>'
+                            + '<button id="wimage-btn-move" type="button" class="btn btn-default btn-sm disabled">' + btnIcon.moveIcon + temp.move + '</button>' 
+                            + '<button id="wimage-btn-delete" type="button" class="btn btn-default btn-sm disabled">' + btnIcon.deleteIcon + temp.del + '</button></div></div>';  
                 //search 
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"> <div class="input-group">'
                             + '<input type="text" class="form-control input-sm" placeholder="Type a name..."><span class="input-group-btn"><button class="btn btn-primary btn-sm" type="button">' 
                             + temp.search + '</button></span></div></div>';
-
                 // upload, create folder
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"><div class="wimage-create-btn-group"><div class="wimage-input-style-group">'
                             + '<input id="file" class="wimage-inputfile" type="file" name="file[]" multiple /><label class="btn btn-default btn-sm" for="file">' + btnIcon.uploadIcon + temp.upload + '</label></div>'   
-                            + '<button class="btn btn-default btn-sm" id="createFolder">' + btnIcon.addfolderIcon + temp.addfolder + '</button></div></div>';
+                            + '<button class="btn btn-default btn-sm" id="wimage-createFolder">' + btnIcon.addfolderIcon + temp.addfolder + '</button></div></div>';
 
                 html_init = html_init + '</div></div>';
-
+                // path folder 
+                html_init += pathHome;
                 //content
-                html_init = html_init + '<div class="wimage-content"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="list"></output></div>';
+                html_init = html_init + '<div class="wimage-content"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="wimage-list"></output></div>';
 
                 html_init = html_init + '</div>';
 
@@ -194,26 +318,30 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * -----------
         * re-contribute from http://www.html5rocks.com/en/tutorials/file/dndfiles
         */
+       
+      
         function upLoad() {
-          var reader,
-              progress = document.querySelector('.percent');
-          function abortRead() {
-            reader.abort();
-          }
-          function errorHandler(evt) {
-            switch(evt.target.error.code) {
-              case evt.target.error.NOT_FOUND_ERR:
-                alert('File Not Found!');
-                break;
-              case evt.target.error.NOT_READABLE_ERR:
-                alert('File is not readable');
-                break;
-              case evt.target.error.ABORT_ERR:
-                break; // noop
-              default:
-                alert('An error occurred reading this file.');
-            };
-          }
+            var reader,
+                progress = document.querySelector('.percent');
+            function abortRead() {
+                reader.abort();
+            }
+            function errorHandler(evt) {
+                switch(evt.target.error.code) {
+                    case evt.target.error.NOT_FOUND_ERR:
+                        alert('File Not Found!');
+                        break;
+                    case evt.target.error.NOT_READABLE_ERR:
+                        alert('File is not readable');
+                        break;
+                    case evt.target.error.ABORT_ERR:
+                        break; // noop
+                    default:
+                        alert('An error occurred reading this file.');
+                };
+            }
+
+
           function updateProgress(evt) {
             // evt is an ProgressEvent.
             if (evt.lengthComputable) {
@@ -225,17 +353,83 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               }
             }
           }
+
+          // validate is image and limit mime type
+          function validateType(file,mimes){
+            var valid = file.type.match("image.*");
+            if(valid){
+              if(mimes === ""){
+                return true;
+              }
+              var mime = valid.input;
+              var l = mimes.length;
+              for(var i = 0 ; i < l ; i++){
+                if(mimes[i] === mime)
+                  return true;
+              }
+            }
+            return false;
+          }
+
+          function getSize(size){
+            if(size){
+              var tail = size.substr(-2,2);
+              tail = tail.toLowerCase();
+              var temp = size.substr(0,size.length - 2);
+              var tempSize = parseInt(temp);
+              switch(tail){
+                case "kb":{
+                  return temp*1024;
+                }break;
+                case "mb":{
+                  return temp*1024*1024;
+                }break;
+                default:
+                  return 1024*1024;
+              }
+            }
+            return 1024*1024;
+          }
+
+          function validateSize(file,size){
+            return (file.size <= size);
+          }
+
+            function setName(str,className){
+                if(isMatch(str,className)){
+                    var temp = str.split(".");
+                    var mime = temp.pop();
+                    var pureName = temp.join("");
+                    pureName += "(1).";
+                    pureName += mime;
+                    return setName(pureName,className);
+                }
+                return str;
+            }
+
           function handleFileSelect(evt) {
               "use strict";
               evt.stopPropagation();
               evt.preventDefault();
               var files = evt.target.files; // FileList object
               // Loop through the FileList and render image files as thumbnails.
-              for (var i = 0, f; f = files[i]; i++) {
+              var numberFile = files.length;
+              numberFile = (numberFile <= defaults.maxFileUpload) ? numberFile : defaults.maxFileUpload;
+
+               var grid = document.getElementById("wimage-btn-grid");
+                var listView = {img: "",name: ""};
+                var display = "";
+                if(!grid.classList.contains("active")){
+                    listView = {img: " wimage-thumbnail-wrapper-list",name: " list-name"};
+                    display = ' style="display: block;"';
+                }
+
+              for (var i = 0; i < numberFile ; i++) {
                 // Only process image files.
-                if (!f.type.match('image.*')) {
+                var fileSize = getSize(defaults.maxSizeUpload);
+                if (!validateSize(files[i],fileSize) || !validateType(files[i],defaults.mimeType)){
                   continue;
-                } 
+                }
                 // Reset progress indicator on new file selection.
                 progress.style.width = '0%';
                 progress.textContent = '0%';
@@ -248,26 +442,29 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 reader.addEventListener('loadstart', function(e) {
                   document.getElementById('progress_bar').className = 'loading';
                 });
+
                 // Closure to capture the file information.
                 reader.onload = (function(theFile) {
                   return function(e) {
                     // Ensure that the progress bar displays 100% at the end.
                     progress.style.width = '100%';
                     progress.textContent = '100%';
-                    setTimeout("document.getElementById('progress_bar').className='';", 2000);
+                    setTimeout("document.getElementById('progress_bar').className='';", 800);
                     // Rendering thumbnail.
                     var span = document.createElement('span');
+                    var nameFile = setName(theFile.name,"ellipsis");
                     span.innerHTML = [
-                                      '<div class="wimage-thumbnail-group"><div class="wimage-thumbnail-wrapper" ><img class="wimageThumbnail" src="', 
+                                      '<div class="wimage-thumbnail-group wimage-item-image"' + display + '><div class="wimage-thumbnail-wrapper'+ listView.img +'"><img class="wimageThumbnail" src="', 
                                       e.target.result, '"/></div>' 
-                                      + '<p class="ellipsis" id="wimage-filename">' + theFile.name + '</p>' // Included file name
+                                      + '<p class="ellipsis'+ listView.name +'" id="wimage-filename" title="'+ nameFile +'">' + nameFile + '</p>' // Included file name
                                       + '</div>'].join('');
-                    document.getElementById('list').insertBefore(span, null);               
+                    document.getElementById('wimage-list').insertBefore(span, null);               
                   };
-                })(f);
+                })(files[i]);
                 // Read in the image file as a data URL.
-                reader.readAsDataURL(f);
+                reader.readAsDataURL(files[i]);
               }
+              evt.target.value = null;
           }
           var file = document.getElementById('file');
           return file.addEventListener('change', handleFileSelect, false);
@@ -278,197 +475,53 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * create folder 
         * -------------
         */
-        function createFolder() {
+        function createFolder(id) {
           "use strict";
           var folderIcon = '<div class="folder-icon"></div>',
-              create = document.getElementById('createFolder'),
+              create = document.getElementById(id),
               fileCount = 0;
+
+            
           //create element when click the button.
           create.addEventListener('click', function(e) {
             "use strict";
             e.stopPropagation();
             e.preventDefault();
-            function fileName(folderName) {
-              folderName = "Album";
-              var fileUp = fileCount++;
-              //generate number of folder's default name
-              if (fileUp === 0) {
-                return folderName;
-              } else {
-                return folderName + " (" + fileUp.toString() + ")";
-              }
-            }          
-            var folder = document.createElement('span');
-            folder.innerHTML = ['<div class="wimage-thumbnail-group"><div class="wimage-thumbnail-wrapper">' + folderIcon + '</div><p class="ellipsis" id="wimage-filename">' + fileName() + '</p></div>'];
-            document.getElementById('list').insertBefore(folder, null); 
+            if(!create.classList.contains("disabled")){
+                function fileName() {
+                    var folderName = "Album";
+                    var fileUp = fileCount++;
+                    folderName = (fileUp === 0) ? folderName : folderName + " (" + fileUp.toString() + ")";
+                    if(isMatch(folderName,"ellipsis"))
+                        return fileName();
+                    else
+                        return folderName;
+                } 
+
+                var grid = document.getElementById("wimage-btn-grid");
+                var listView = {img: "",name: ""};
+                var display = "";
+                if(!grid.classList.contains("active")){
+                    listView = {img: " wimage-thumbnail-wrapper-list",name: " list-name"};
+                    display = ' style="display: block;"';
+                }
+
+                var folder = document.createElement('span');
+                folder.innerHTML = ['<div class="wimage-thumbnail-group wimage-item-folder"'+ display +'><div class="wimage-thumbnail-wrapper'+ listView.img +'">' + folderIcon + '</div><p class="ellipsis '+ listView.name +'" id="wimage-filename">' + fileName() + '</p></div>'];
+                document.getElementById('wimage-list').insertBefore(folder, null); 
+            }
           });
         }
-        createFolder();
-        /*
-        * -------------
-        * select files 
-        * -------------
-        */
-        function selectFile() {
-          //key code for cmd/ctrl click, shift click
-          var cmd = 91, ctrl = 17, shift = 16;
-          // SVG Helper
-          var setSVGAtts = function (el, atts) {
-                if (atts !== undefined) {
-                  for (var k in atts) {
-                    el.setAttributeNS(null, k, atts[k]);
-                  }
-                }
-              return el;
-              },
-              createSVG = function (tag, atts) {
-                var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-                // set SVG attributes
-                setSVGAtts(el, atts);
-                return el;
-              },
-              //selectables = document.querySelectorAll('[data-selectable]'),
-              selectables = document.getElementById('list'),
-              startX, startY, deltaX, deltaY, transX, transY, rafID;
+        createFolder('wimage-createFolder');
 
-          var content = document.querySelector('.wimage-content'),
-              svg = createSVG('svg', { viewBox: '0 0 0 0', width: 0, height: 0 }),
-              rect = createSVG('rect', { width: '100%', height: '100%' }),
-              isDragging = false;
-
-          // add rect to svg
-          svg.appendChild(rect);
-          // add svg to DOM
-          content.appendChild(svg);
-
-          // checks if anything is selected within set of x and y ranges
-          function findSelectables() { 
-            var a = svg.getBoundingClientRect();
-            //delegate event 
-            selectables.getBoundingClientRect(function(e) {
-              if (e.target) {
-                var b = target.getBoundingClientRect();
-                if(isColliding(a, b)) {
-                  target.classList.add('file-selected');
-                } else {
-                  target.classList.remove('file-selected');
-                }
-              }
-            });
-          }
-          //checks if two elements are colliding
-          function isColliding(a, b) {
-            return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
-          }
-          // delegate event to listen for click. 
-          selectables.addEventListener('click', function selectableClickHandler(e) {
-            if (e.target) {
-              var target = false;
-              if (e.target.matches("div.wimage-thumbnail-wrapper")) {
-                target = e.target;
-              } else {
-                target = find("div.wimage-thumbnail-wrapper", e.target);
-                
-                var file_seleced = document.getElementsByClassName("wimage-thumbnail-wrapper");
-                for(var i = 0; i < file_seleced.length; i++){
-                  file_seleced[i].classList.remove('file-selected');
-                }
-                
-              }
-              if (!target) {
-                return;
-              }
-            }
-            if (!isDragging) {
-              //remove selected class from all selectables
-              if (target.classList.contains('file-selected')) {
-                target.classList.remove('file-selected');
-              } else {
-                target.classList.add('file-selected');
-              }
-            }       
-          });
-
-          function updateDragSelectBoxPos(e) {        
-            var width = deltaX || 0,
-                height = deltaY || 0;
-            
-            // set position of SVG
-            svg.style.transform = 'translate('+ transX +'px, '+ transY +'px)';
-            
-            // svg width / height
-            setSVGAtts(svg, {
-                viewBox: '0 0 '+ width +' '+ height,
-                width: width,
-                height: height
-            });
-            
-            // do we need to update
-            if(isDragging) {
-              rafID = requestAnimationFrame(updateDragSelectBoxPos);
-            }
-          }
-          function dragStart(e) {      
-            // get starting coords
-            startX = e.pageX;
-            startY = e.pageY;
-            
-            // add helper styling class
-            content.classList.add('dragging');
-            
-            // listen for drag and release
-            content.addEventListener('mousemove', dragMove);
-            content.addEventListener('mouseup', dragUp);
-            
-            // start animating
-            rafID = requestAnimationFrame(updateDragSelectBoxPos);
-            
-            // dragging
-            isDragging = true;
-          }
-          function dragMove(e) {
-              
-             // get current relative to start coords
-            deltaX = Math.abs(e.pageX - startX);
-            deltaY = Math.abs(e.pageY - startY);
-            
-            // check if we need to move position
-            transX = (startX > e.pageX) ? (startX - deltaX) : startX;
-            transY = (startY > e.pageY) ? (startY - deltaY) : startY;
-          }
-
-          function dragUp(e) {
-              
-            // stopped dragging
-            isDragging = false;
-            
-            // check if we selected anything
-            findSelectables();
-            
-            // clear current animation
-            cancelAnimationFrame(rafID);
-            
-            // reset atts on release
-            deltaX =
-            deltaY = 0;
-            setSVGAtts(svg, { viewBox: '0 0 0 0', width: 0, height: 0 });
-            
-            // remove helper styling class
-            content.classList.remove('dragging');
-            
-            content.removeEventListener('mousemove', dragMove);
-            content.removeEventListener('mouseup', dragUp);
-          }
-
-          // listen for drag start
-          content.addEventListener('mousedown', dragStart);
-        }
-        selectFile();
         /*
         * -------------
         * context menu 
         * -------------
         */
+        var globalBody = document.getElementsByClassName("wimage-group")[0];
+        var main = globalBody.lastChild;
+        var nav  = globalBody.firstChild;
         function contextMenu() {
           var cMenuTitle = {
                              default: {
@@ -504,58 +557,151 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                              del: '<i class="fa fa-trash"></i>'
                            }
           };
-          var cMenuClassName = "context-menu", 
+
+          // Type of menu
+          //To do: variables menu 
+          // var cMenuTemp = function() {
+          //   var clickTo = document.getElementById("list");
+          //   clickTo.addEventListener("click",function() {
+          //     if (e.target) {
+          //       var target = false;
+          //       if (e.target.matches("div.wimage-thumbnail-wrapper")) {
+          //         target = e.target;
+          //       } else {
+          //         target = find("div.wimage-thumbnail-wrapper", e.target);
+          //       }
+          //       if (!target) {
+          //         return;
+          //       }
+          //     }
+          //   });
+          // };
+          // switch (cMenuTemp) {
+          //   case "general": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"<li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>'); 
+          //   break;
+          //   case "folder": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">'  + cMenuIcons.folder.explore + cMenuTitle.folder.explore +'</button></li><li><button class="context-menu-item-button">' + cMenuIcons.folder.editName + cMenuTitle.folder.editName + '</button><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.folder.del + cMenuTitle.folder.del + '</button></li></li></menu>');
+          //   break;
+          //   case "image": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>');
+          //   break;
+          //   default: ""
+          // }
+
+
+        var menuStart = '<menu class="context-menu dropdown-menu" ';
+        var menuEnd = '</menu>';
+        var lineStart = '<li class="context-menu-item"><button class="context-menu-item-button"';
+        var lineMid = '>';
+        var lineEnd = '</button></li>';
+
+        document.write(menuStart + 'id="contextMenu">' + 
+                        lineStart + 'value="createFolder"' + lineMid + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + lineEnd + 
+                        lineStart + 'value="upload"' + lineMid + cMenuIcons.default.upload + cMenuTitle.default.upload + lineEnd + 
+                        menuEnd);
+        document.write(menuStart + 'id="contextMenuImage">' +  
+                        lineStart + 'value="preview"' + lineMid + cMenuIcons.image.preview + cMenuTitle.image.preview + lineEnd + 
+                        lineStart + 'value="editName"' + lineMid + cMenuIcons.image.editName + cMenuTitle.image.editName + lineEnd +
+                        lineStart + 'value="changeFolder"' + lineMid + cMenuIcons.image.changeFolder + cMenuTitle.image.changeFolder + lineEnd + 
+                        lineStart + 'value="deleteImage"' + lineMid + cMenuIcons.image.del + cMenuTitle.image.del + lineEnd + 
+                        menuEnd);
+
+        document.write(menuStart + 'id="contextMenuFolder">' +  
+                        lineStart + 'value="explore"' + lineMid + cMenuIcons.folder.explore + cMenuTitle.folder.explore + lineEnd + 
+                        lineStart + 'value="editName"' + lineMid + cMenuIcons.folder.editName + cMenuTitle.folder.editName + lineEnd +
+                        lineStart + 'value="deleteFolder"' + lineMid + cMenuIcons.folder.del + cMenuTitle.folder.del + lineEnd + 
+                        menuEnd);
+
+        var taskItemClassName = "wimage-content", 
+            taskItemInContext;
+
+        var cMenuClassName = "context-menu", 
               cMenuItemClassName = "context-menu-item", 
               cMenuButtonClassName = "context-menu-item-button",
               cMenuActive = "show-context-menu"; 
 
-          var clickCoords,
+        var clickCoords,
               clickCoordsX,
-              clickCoorsY;
+              clickCoordsY;
 
-          var menu = document.getElementById('contextMenu'),
-              menuItems = menu.querySelector('.context-menu-item'),
-              menuState = 0,
-              menuWidth,
-              menuHeight,
-              menuPosition,
-              menuPositionX,
-              menuPositionY,
-              windowWidth,
-              windowHeight;
+        var menu = {
+            main: document.getElementById('contextMenu'),
+            state: 0
+        }
+        var imageMenu = {
+            main: document.getElementById('contextMenuImage'),
+            state: 0
+        }
+        var folderMenu = {
+            main: document.getElementById('contextMenuFolder'),
+            state: 0
+        }
 
-          var cMenuTemplate = {
-                              general: '<menu class="context-menu dropdown-menu" id="contextMenu"<li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' 
-                                       + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>',
-                              folder: '<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">'  + cMenuIcons.folder.explore + cMenuTitle.folder.explore +'</button></li><li><button class="context-menu-item-button">' 
-                                      + cMenuIcons.folder.editName + cMenuTitle.folder.editName + '</button><li class="context-menu-item"><button class="context-menu-item-button"' 
-                                      + cMenuIcons.folder.del + cMenuTitle.folder.del + '</button></li></li></menu>',
-                              image: '<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button"' 
-                                     + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>'
-          }; 
-          // Type of menu
-          function cMenuTemp() {
+        function getTarget(e){
+            e = (e) ? e : window.event;
+            var target = e.target;
+            var classList = target.classList;
 
-          }
-          // Listens for context menu event
-          function contextListener() {
-            cMenuTemp();
-            document.addEventListener('contextmenu', function(e) {
-              var taskItemClassName,
-                  taskItemInContext;
-              taskItemInContext = clickInsideElement(e, taskItemClassName);
-              if (taskItemInContext) {
-                e.preventDefault();
-                toggleMenuOn();
-                positionMenu(e);
-              } else {
-                taskItemInContext = null;
-                toggleMenuOff();
-              }
+            var temp;
+
+            if(classList.contains("wimageThumbnail")){
+                return { class: "wimage-item-image",node: target.parentNode.parentNode}
+            }
+            if(classList.contains("folder-icon")){
+                return { class: "wimage-item-folder",node: target.parentNode.parentNode}
+            }
+            if(classList.contains("wimage-thumbnail-wrapper") || classList.contains('ellipsis')){
+                temp = target.parentNode;
+            }
+            if(classList.contains("wimage-thumbnail-group")){
+                temp = target;
+            }
+            if(temp){
+                if(temp.classList.contains('wimage-item-image'))
+                    return { class: "wimage-item-image",node: temp}
+                else
+                    if(temp.classList.contains('wimage-item-folder'))
+                        return { class: "wimage-item-folder",node: temp}
+            }
+                  
+            return {class:null,node:null};
+        }
+
+        function init() {
+            contextListener();
+            clickListener();
+            keyupListener()
+            resizeListener();
+        }
+
+        // Listens for context menu event
+        function contextListener() {
+            main.addEventListener('contextmenu', function(e) {
+                // taskItemInContext = clickInsideElement(e, taskItemClassName);
+                // if (taskItemInContext) {
+                //     e.preventDefault();
+                //     toggleMenuOn();
+                //     positionMenu(e,menu);
+                // } else {
+                //     taskItemInContext = null;
+                //     toggleMenuOff();
+                // }
+                turnOff();
+                var target = getTarget(e);
+                switch(target.class){
+                    case "wimage-item-folder":{
+                        turnOn(e,folderMenu);
+                        activeNode(target.node);
+                    }break;
+                    case "wimage-item-image":{
+                        turnOn(e,imageMenu);
+                        activeNode(target.node);
+                    }break;
+                    default:
+                        turnOn(e,menu);
+                }
             });
-          }
+        }
           // Listens for click event: click into item on menu 
-          function clickListener() {
+        function clickListener() {
             document.addEventListener('click', function(e) {
               var clickElemButton = clickInsideElement(e, cMenuButtonClassName);
               if (clickElemButton) {
@@ -564,74 +710,598 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               } else {
                 var button = e.which || e.button;
                 if (button === 1) {
-                  toggleMenuOff();
+                    turnOff();
                 }
               }
             });
-          }
+        }
           // Listens for keyup event 
           // close menu with escape key
-          function keyupListener() {
+        function keyupListener() {
             window.onkeyup = function(e) {
-              if (e.keyCode === 27) {
-                toggleMenuOff();
-              }
+                if (e.keyCode === 27) {
+                    turnOff();
+                }
             }
-          }
+        }
           // window resize event 
           // close menu when resize window 
-          function resizeListener() {
+        function resizeListener() {
             window.onresize = function(e) {
-              toggleMenuOff();
+                turnOff();
             };
-          }
-          // Show menu 
-          function toggleMenuOn() {
-            if (menuState !== 1) {
-              menuState = 0;
-              menu.classList.add(cMenuActive);
-            }
-          }
-          // Turn off menu 
-          function toggleMenuOff() {
-            if (menuState !== 0) {
-              menuState = 0;
-              menu.classList.remove(cMenuActive);
-            }
-          }
-          // Menu position
-          function positionMenu(e) {
-            clickCoords = getPosition(e);
-            clickCoordsX = clickCoords.x;
-            clickCoordsY = clickCoords.y;
+        }
 
-            menuWidth = menu.offsetWidth + 4;
-            menuHeight = menu.offsetHeight + 4;
+        function activeNode(target){
+            target.classList.add("file-selected");
+        }
 
-            windowWidth = window.innerWidth;
-            windowHeight = window.innerHeight;
+        // Show menu 
+        function toggleMenuOn(menu) {
+            if (menu.state !== 1) {
+              menu.state = 1;
+              menu.main.classList.add(cMenuActive);
+            }
+        }
+
+        function turnOn(e,menu){
+            e = (e) ? e : window.event;
+            e.preventDefault();
+            e.stopPropagation();
+            positionMenu(e,menu);
+            toggleMenuOn(menu);
+        }
+
+        // Turn off menu 
+        function toggleMenuOff(menu) {
+            if (menu.state !== 0) {
+              menu.state = 0;
+              menu.main.classList.remove(cMenuActive);
+            }
+        }
+
+        function turnOff(){
+            toggleMenuOff(menu);
+            toggleMenuOff(imageMenu);
+            toggleMenuOff(folderMenu);
+        }
+
+        // Menu position
+        function positionMenu(e,menu) {
+            var clickCoords = getPosition(e);
+            var clickCoordsX = clickCoords.x;
+            var clickCoordsY = clickCoords.y;
+
+            var menuWidth = menu.main.offsetWidth + 4;
+            var menuHeight = menu.main.offsetHeight + 4;
+
+            var windowWidth = window.innerWidth;
+            var windowHeight = window.innerHeight;
 
             if ((windowWidth - clickCoords) < menuWidth) {
-              menu.style.left = windowWidth - menuWidth + "px";
+              menu.main.style.left = windowWidth - menuWidth + "px";
             } else {
-              menu.style.left = clickCoordsX + 'px';
+              menu.main.style.left = clickCoordsX + 'px';
             }
 
             if ((windowHeight - clickCoordsY) < menuHeight) {
-              menu.style.top = windowHeight - menuHeight + "px";
+              menu.main.style.top = windowHeight - menuHeight + "px";
             } else {
-              menu.style.top = clickCoordsY + 'px';
+              menu.main.style.top = clickCoordsY + 'px';
             }
-          }
+        }
           // Listen for item clicked
           // to do: apply function to context menu 
           // close menu after click 
-          function menuItemListener(button) {
-            toggleMenuOff();
-          }
+            function menuItemListener(button) {
+                turnOff();
+            }
+
+            init();
+
+            var defaultItemMenu = menu.main;
+            var imageItemMenu = imageMenu.main;
+            var folderItemMenu = folderMenu.main;
+            
+            function contextClickEvent(){
+
+                function getTargetContext(e){
+                    var target = e.target;
+                    if(target.nodeName === "BUTTON")
+                        return target;
+                    else{
+                        if(target.nodeName === "I")
+                            return target.parentNode;
+                    }
+                }  
+
+                var btnCreateFolder = document.getElementById("wimage-createFolder");
+                var btnUpload = document.getElementById("file");
+                var btnDelete = document.getElementById("wimage-btn-delete");
+                var btnRename = document.getElementById("wimage-btn-rename");
+
+                defaultItemMenu.addEventListener("click",function(e){
+                    var target = getTargetContext(e);
+                    if(target){
+                        var value = target.value;
+                        switch(value){
+                            case "createFolder":{
+                                btnCreateFolder.click();
+                            }break;
+                            case "upload":{
+                                btnUpload.click();
+                            }break;
+                        }
+                    }                 
+                });
+
+                imageItemMenu.addEventListener("click",function(e){
+                    var target = getTargetContext(e);
+                    if(target){
+                        var value = target.value;
+                        switch(value){
+                            case "preview":{
+                                
+                            }break;
+                            case "editName":{
+                                btnRename.click();
+                            }break;
+                            case "changeFolder":{
+                              
+                            }break;
+                            case "deleteImage":{
+                                btnDelete.click();
+                            }break;
+                        }
+                    }
+                });
+
+                folderItemMenu.addEventListener("click",function(e){
+                    var target = getTargetContext(e);
+                    if(target){
+                        var value = target.value;
+                        switch(value){
+                            case "explore":{
+                                
+                            }break;
+                            case "editName":{
+                                btnRename.click();
+                            }break;
+                            case "deleteFolder":{
+                                btnDelete.click();
+                            }break;
+                        }
+                    }  
+                });
+
+            }   
+            
+            contextClickEvent();       
 
         }
-        //contextMenu();
+        contextMenu();
+
+        /*
+        * -------------
+        * select files 
+        * -------------
+        */
+
+        var output = document.getElementById("wimage-list");
+        
+
+        function selectFile() {
+
+            //set attributes for SVG
+            function setAttribute(el,attr){
+                for(var i in attr){
+                    el.setAttributeNS(null,i,attr[i]);
+                }
+            }
+            // craate SVG element
+            function createSVG(tag,attr){
+                var ns = "http://www.w3.org/2000/svg";
+                var svg = document.createElementNS(ns,tag);
+                var rect = document.createElementNS(ns,"rect");
+                setAttribute(rect,{width: "100%",height: "100%"});
+                setAttribute(svg,attr);
+                svg.appendChild(rect);
+                return svg;
+            }
+
+            var attr = {width: 0,height: 0,viewBox: "0 0 0 0"};
+            var svg = createSVG("svg",attr);
+            main.appendChild(svg);
+
+            var start = {},delta = {},newPos = {},tran = {};
+
+            // update lại khung ảnh svg
+            function updatePosition(){
+                svg.style.transform = "translate(" + tran.x + "px, " + tran.y + "px)";
+                attr = {
+                    width: newPos.x,
+                    height: newPos.y,
+                    viewBox: "0 0 " + newPos.x + " " + newPos.y
+                };
+                setAttribute(svg,attr);
+            }
+
+            // wrap 
+            function move(e){
+                findSelect();
+                e = (e) ? e : window.event;
+                // tìm đoạn di chuyển con trỏ
+                delta.x = Math.abs(e.clientX - start.x);
+                delta.y = Math.abs(e.clientY - start.y);
+
+                // nếu di chuyển theo chiều thuận thì k dời điểm bắt đầu, ng lại dời
+                tran.x = (e.clientX > start.x) ? start.x : (start.x - delta.x);
+                tran.y = (e.clientY > start.y) ? start.y : (start.y - delta.y);
+
+                // độ dài và rộng svg
+                newPos.x = delta.x;
+                newPos.y = delta.y;
+                updatePosition();
+            }
+
+            function removeAnimation(){
+                main.removeEventListener("mousemove", move);
+                attr = {width: 0,height: 0, viewBox: "0 0 0 0"};
+                setAttribute(svg,attr);
+                svg.style.display = "none";
+                main.classList.remove("wimage-content-active");
+
+                activeButton([btnDelete,btnMove,btnRename]);
+            }
+
+            /**
+             * Valid and deal with select
+             */
+
+             //2 hcn colliding
+            function isColliding(a,b){
+                return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
+            }
+
+            // thêm select class cho hình đc chọn
+            function addSelect(img){
+                if(img.id !== "wimage-back-path"){
+                    img.classList.add("file-selected");
+                }   
+            }
+
+            // remove
+            function removeSelect(img){
+                img.classList.remove("file-selected");
+            }
+
+            // tìm hình đc chọn trong vùng draw
+            function findSelect(){
+                var rect = document.getElementsByClassName("wimage-thumbnail-group");    
+                var posSVG = svg.getBoundingClientRect();
+                var l = rect.length;
+                for(var i = l ;i--;){
+                    var posRect = rect[i].getBoundingClientRect();
+                    if(isColliding(posSVG,posRect)){
+                            addSelect(rect[i]);        
+                    }else{
+                       removeSelect(rect[i]);
+                    }
+                }
+            }
+            
+            // reset lại tất cả các file đc chọn
+            function resetSelected(){
+                var listE = document.getElementsByClassName("file-selected");
+                var length  = listE.length;
+                for(var i= length ; i-- ;){
+                    removeSelect(listE[i]);
+                }
+            }
+
+            function findSelected(target){
+                var classList = target.classList;
+                if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
+                    return target.parentNode.parentNode;
+                }
+                if(classList.contains("ellipsis")){
+                    return target.parentNode;
+                }
+                if(classList.contains("wimage-thumbnail-wrapper")){
+                    return target.parentNode;
+                }
+                if(classList.contains("wimage-thumbnail-group")){
+                    return target;
+                }
+                return null;
+            }
+
+            // có ít nhất 1 file dc chọn
+            function isSelected(){
+                var temp = document.getElementsByClassName("file-selected");
+                if(temp.length === 0){
+                    return false;
+                }
+                return temp.length;
+            }
+
+            // active các nút delete move rename nếu có ít nhất 1 file đc chọn
+            function activeButton(btn){
+                var l = isSelected();
+                if(l){
+                    for(var i in btn){
+                        btn[i].classList.remove("disabled");
+                    } 
+                }else{
+                     for(var i in btn){
+                        btn[i].classList.add("disabled");
+                    }
+                }
+                if(l === 1){
+                    document.getElementById("wimage-btn-rename").classList.remove("disabled");
+                }else{
+                     document.getElementById("wimage-btn-rename").classList.add("disabled");
+                }         
+            }
+
+            /**
+             * ---------------------------------
+             */
+
+            //get button 
+            var btnDelete = document.getElementById("wimage-btn-delete");
+            var btnMove = document.getElementById("wimage-btn-move");
+            var btnRename = document.getElementById("wimage-btn-rename");
+            
+
+            /**
+             * ------------------------------------
+             */
+
+            // for draw and choose file
+            main.addEventListener("mousedown",function(event){
+                start.x = event.clientX;
+                start.y = event.clientY;
+                // add class active user-select
+                main.classList.add("wimage-content-active");
+                // hiển thi khung svg
+                svg.style.display = "block";
+
+                main.addEventListener("mousemove",move); 
+                main.addEventListener("mouseup",removeAnimation);
+                resetSelected();
+            });
+            /**
+             * ---------------------------------------
+             */
+            
+            // add popup menu
+            var modal = createPopup("myModal",["Are you sure ??? "],[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
+            ]);
+
+            var renamePopup = createPopupRename("renamePopup",[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
+            ]);
+
+            nav.appendChild(modal);
+            nav.appendChild(renamePopup);
+
+            function addMultiSelect(target,length){
+                for(var i = length ; i-- ;){
+                    addSelect(target[i]);
+                }
+            }
+
+            function deleteSelected(){
+                var selected = document.getElementsByClassName("file-selected");
+                var length = selected.length;
+                for(var i = length; i-- ;){
+                    var grandParent = selected[i].parentNode;
+                    var hugeParent = grandParent.parentNode;
+                    hugeParent.removeChild(grandParent);
+                }
+                activeButton([btnDelete,btnMove,btnRename]);
+            }
+                   
+            //set popup
+            function setPopup(node,toggle,target){
+                node.setAttribute("data-toggle", toggle);
+                node.setAttribute("data-target", target);
+            }
+
+            setPopup(btnDelete,"modal","#myModal");
+            setPopup(btnRename,"modal","#renamePopup");
+
+            //stop event
+            function disabled(e){
+                e = (e) ? e : window.event;
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+             // click envent
+            function clickHandler(){
+            
+                main.addEventListener('click',function(e){
+                    var target = findSelected(e.target);   
+                    if(target){
+                       addSelect(target);
+                       activeButton([btnDelete,btnMove,btnRename]);
+                    }            
+                });
+
+                btnDelete.addEventListener("click",function(e){
+                    if(isSelected()){
+                        var confirm = document.getElementById("wimage-modal-confirm");
+                        confirm.addEventListener("click",function(e){            
+                            var data = e.target;
+                            if(data.id === "wimage-delete-agree"){
+                                deleteSelected();
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                btnRename.addEventListener("click",function(e){
+                    var selected = document.getElementsByClassName("file-selected");
+                    if(selected.length === 1){
+                        var sameName = document.getElementById("wimage-rename-samename");
+                        sameName.style.visibility = "hidden";
+                        var target = selected[0];
+                        var name = target.lastChild.firstChild.nodeValue;
+                        var inputName = document.getElementById("nameValue");
+                        inputName.value = name;
+                        var confirm = document.getElementById("wimage-rename-agree");
+                        confirm.addEventListener("click",function(e){ 
+                            var tempSelected = document.getElementsByClassName("file-selected"); 
+                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
+                            var newName = inputName.value;
+                            if(isMatch(newName,"ellipsis")){
+                                if(newName !== tempName){
+                                    sameName.style.visibility = "visible";
+                                    e.stopPropagation();
+                                }                    
+                            }else{
+                                tempSelected[0].lastChild.firstChild.nodeValue = newName;    
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                function createBackImage(src){
+                    var content = "<span>";
+                    content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail" src="';
+                    content += src;
+                    content += '"/></div><p class="ellipsis">&nbsp;</p></div>';
+                    return content;
+                }   
+
+                var TEMP_OUTPUT;
+                var wimagePath = document.getElementById("wimage-back-foldername");
+                var wimageCreateFolder = document.getElementById("wimage-createFolder");
+                var contextDefaultMenu = document.getElementById("contextMenu");
+                var childCreateFolder  = contextDefaultMenu.firstChild;
+
+                // open folder
+                main.addEventListener("dblclick",function(e){
+                    var target = findSelected(e.target);
+                    //if double click on foler 
+                    if(target && target.classList.contains("wimage-item-folder")){  
+                        TEMP_OUTPUT = output.innerHTML;            
+                        output.innerHTML = null;
+                        var backImg = createBackImage("assets/images/enter.png");
+                        output.innerHTML = backImg; 
+                        var nameFolder = target.lastChild.firstChild.nodeValue;
+                        // create only 1 level folder
+                        wimagePath.previousSibling.style.display = "block";
+                        wimagePath.innerHTML = nameFolder;
+                        wimageCreateFolder.classList.add("disabled");
+                        contextDefaultMenu.removeChild(childCreateFolder);
+                    }
+                    var backPath = document.getElementById("wimage-back-path");
+                    if(backPath){
+                        backPath.addEventListener("click",function(e){
+                            disabled(e); 
+                        });
+                        backPath.addEventListener("dblclick",function(e){
+                            output.innerHTML = null;
+                            output.innerHTML = TEMP_OUTPUT;
+                            wimagePath.previousSibling.style.display = "none";
+                            wimagePath.innerHTML = null;
+                            wimageCreateFolder.classList.remove("disabled");
+                            contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
+                        });
+                    }
+                   
+                });
+
+                // window.onbeforeunload = function() {
+                //     return "You want to leave this site !";
+                // }
+    
+            }   
+
+            clickHandler();
+
+            /**
+             * Button
+             * -------------------------------------
+             */
+
+            var keyboard = {
+                detectKeyboard: function(event){
+                    event = (event) ? event : window.event;
+                    if(event.ctrlKey){
+                        switch(event.keyCode){
+                            case 65: return "ctrlA";
+                            case 67: return "ctrlC";
+                            case 86: return "ctrlV";
+                            case 88: return "ctrlX"; 
+                            case 90: return "ctrlZ";  
+                        }
+                    }else{
+                        switch(event.keyCode){
+                            case 46: return "delete";
+                            case 8: return "backspace";
+                            case 13: return "enter"; 
+                        } 
+                    }
+                    return null;
+                }
+            };
+
+            
+           
+            document.addEventListener("keydown",function(event){
+                var body = document.body;
+                body.classList.add("non-select");
+                var selectables = document.getElementsByClassName("wimage-thumbnail-group");
+                var length = selectables.length;
+                var target = event.target;
+                if(target.nodeName !== "INPUT"){
+
+                    switch(keyboard.detectKeyboard(event)){
+                        case "ctrlA":{       
+                            addMultiSelect(selectables,length);
+                            activeButton([btnDelete,btnMove,btnRename]);
+                        }break;
+                        case "delete":{                  
+                            btnDelete.click();
+                        }break;
+                    }
+
+                    document.addEventListener("keyup",function(){
+                        body.classList.remove("non-select");
+                    });
+
+                }
+
+            });
+
+         /**
+         * END Button
+         * -------------------------------------
+         */
+
+        }
+
+        selectFile();
+
+        /*
+        * -------------
+        * Keyboard event 
+        * -------------
+        */
+  
+
+
 
         /*
         * -------------
@@ -639,8 +1309,44 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * -------------
         */
         function switchView() {
+            var items = document.getElementsByClassName("wimage-thumbnail-group");
+            var btnGrid = document.getElementById("wimage-btn-grid");
+            var btnList = document.getElementById("wimage-btn-list");
+            function view(listNode,flag){
+                var l = listNode.length;
+                // list view
+                if(flag){
+                    for(var i = l ; i--;){
+                        var thum = listNode[i].firstChild;
+                        var name = thum.nextSibling;
+                        thum.classList.add("wimage-thumbnail-wrapper-list");
+                        name.classList.add("list-name");
+                        listNode[i].style.display = "block";
+                    }
+                }else{
+                    for(var i = l ; i--;){
+                        var thum = listNode[i].firstChild;
+                        var name = thum.nextSibling;
+                        thum.classList.remove("wimage-thumbnail-wrapper-list");
+                        name.classList.remove("list-name");
+                        listNode[i].style.display = "inline-block";
+                    }
+                }                 
+                }
 
+                btnGrid.addEventListener("click",function(){
+                    this.classList.add("active");
+                    btnList.classList.remove("active");
+                    view(items,false);
+                });
+
+                btnList.addEventListener("click",function(){
+                    this.classList.add("active");
+                    btnGrid.classList.remove("active");
+                    view(items,true);
+            });
         }
+        switchView();
         /*
         * -------------
         * edit file 
@@ -664,5 +1370,3 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
     window.WimageFilemanager;
 
 })();
-
-
