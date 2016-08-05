@@ -278,6 +278,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * --------------------
         */
         function AppLayout() {
+
+            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
+
             var html_init = '<div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
 
@@ -292,16 +295,16 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"> <div class="input-group">'
                             + '<input type="text" class="form-control input-sm" placeholder="Type a name..."><span class="input-group-btn"><button class="btn btn-primary btn-sm" type="button">' 
                             + temp.search + '</button></span></div></div>';
-
                 // upload, create folder
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"><div class="wimage-create-btn-group"><div class="wimage-input-style-group">'
                             + '<input id="file" class="wimage-inputfile" type="file" name="file[]" multiple /><label class="btn btn-default btn-sm" for="file">' + btnIcon.uploadIcon + temp.upload + '</label></div>'   
                             + '<button class="btn btn-default btn-sm" id="wimage-createFolder">' + btnIcon.addfolderIcon + temp.addfolder + '</button></div></div>';
 
                 html_init = html_init + '</div></div>';
-
+                // path folder 
+                html_init += pathHome;
                 //content
-                html_init = html_init + '<div class="wimage-content"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="list"></output></div>';
+                html_init = html_init + '<div class="wimage-content"><div id="progress_bar"><div class="percent">0%</div></div><output class="wimage-file-group" id="wimage-list"></output></div>';
 
                 html_init = html_init + '</div>';
 
@@ -455,7 +458,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                                       e.target.result, '"/></div>' 
                                       + '<p class="ellipsis'+ listView.name +'" id="wimage-filename" title="'+ nameFile +'">' + nameFile + '</p>' // Included file name
                                       + '</div>'].join('');
-                    document.getElementById('list').insertBefore(span, null);               
+                    document.getElementById('wimage-list').insertBefore(span, null);               
                   };
                 })(files[i]);
                 // Read in the image file as a data URL.
@@ -484,409 +487,41 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             "use strict";
             e.stopPropagation();
             e.preventDefault();
-            function fileName() {
-                var folderName = "Album";
-                var fileUp = fileCount++;
-                folderName = (fileUp === 0) ? folderName : folderName + " (" + fileUp.toString() + ")";
-                if(isMatch(folderName,"ellipsis"))
-                    return fileName();
-                else
-                    return folderName;
-            } 
+            if(!create.classList.contains("disabled")){
+                function fileName() {
+                    var folderName = "Album";
+                    var fileUp = fileCount++;
+                    folderName = (fileUp === 0) ? folderName : folderName + " (" + fileUp.toString() + ")";
+                    if(isMatch(folderName,"ellipsis"))
+                        return fileName();
+                    else
+                        return folderName;
+                } 
 
-            var grid = document.getElementById("wimage-btn-grid");
-            var listView = {img: "",name: ""};
-            var display = "";
-            if(!grid.classList.contains("active")){
-                listView = {img: " wimage-thumbnail-wrapper-list",name: " list-name"};
-                display = ' style="display: block;"';
+                var grid = document.getElementById("wimage-btn-grid");
+                var listView = {img: "",name: ""};
+                var display = "";
+                if(!grid.classList.contains("active")){
+                    listView = {img: " wimage-thumbnail-wrapper-list",name: " list-name"};
+                    display = ' style="display: block;"';
+                }
+
+                var folder = document.createElement('span');
+                folder.innerHTML = ['<div class="wimage-thumbnail-group wimage-item-folder"'+ display +'><div class="wimage-thumbnail-wrapper'+ listView.img +'">' + folderIcon + '</div><p class="ellipsis '+ listView.name +'" id="wimage-filename">' + fileName() + '</p></div>'];
+                document.getElementById('wimage-list').insertBefore(folder, null); 
             }
-
-            var folder = document.createElement('span');
-            folder.innerHTML = ['<div class="wimage-thumbnail-group wimage-item-folder"'+ display +'><div class="wimage-thumbnail-wrapper'+ listView.img +'">' + folderIcon + '</div><p class="ellipsis '+ listView.name +'" id="wimage-filename">' + fileName() + '</p></div>'];
-            document.getElementById('list').insertBefore(folder, null); 
           });
         }
         createFolder('wimage-createFolder');
-        /*
-        * -------------
-        * select files 
-        * -------------
-        */
-        var globalBody = document.getElementsByClassName("wimage-group")[0];
-        var main = globalBody.lastChild;
-        var nav  = globalBody.firstChild;
-
-        function selectFile() {
-
-            //set attributes for SVG
-            function setAttribute(el,attr){
-                for(var i in attr){
-                    el.setAttributeNS(null,i,attr[i]);
-                }
-            }
-            // craate SVG element
-            function createSVG(tag,attr){
-                var ns = "http://www.w3.org/2000/svg";
-                var svg = document.createElementNS(ns,tag);
-                var rect = document.createElementNS(ns,"rect");
-                setAttribute(rect,{width: "100%",height: "100%"});
-                setAttribute(svg,attr);
-                svg.appendChild(rect);
-                return svg;
-            }
-
-            var attr = {width: 0,height: 0,viewBox: "0 0 0 0"};
-            var svg = createSVG("svg",attr);
-            main.appendChild(svg);
-
-            var start = {},delta = {},newPos = {},tran = {};
-
-            // update lại khung ảnh svg
-            function updatePosition(){
-                svg.style.transform = "translate(" + tran.x + "px, " + tran.y + "px)";
-                attr = {
-                    width: newPos.x,
-                    height: newPos.y,
-                    viewBox: "0 0 " + newPos.x + " " + newPos.y
-                };
-                setAttribute(svg,attr);
-            }
-
-            // wrap 
-            function move(e){
-                findSelect();
-                e = (e) ? e : window.event;
-                // tìm đoạn di chuyển con trỏ
-                delta.x = Math.abs(e.clientX - start.x);
-                delta.y = Math.abs(e.clientY - start.y);
-
-                // nếu di chuyển theo chiều thuận thì k dời điểm bắt đầu, ng lại dời
-                tran.x = (e.clientX > start.x) ? start.x : (start.x - delta.x);
-                tran.y = (e.clientY > start.y) ? start.y : (start.y - delta.y);
-
-                // độ dài và rộng svg
-                newPos.x = delta.x;
-                newPos.y = delta.y;
-                updatePosition();
-            }
-
-            function removeAnimation(){
-                main.removeEventListener("mousemove", move);
-                attr = {width: 0,height: 0, viewBox: "0 0 0 0"};
-                setAttribute(svg,attr);
-                svg.style.display = "none";
-                main.classList.remove("wimage-content-active");
-
-                activeButton([btnDelete,btnMove,btnRename]);
-            }
-
-            /**
-             * Valid and deal with select
-             */
-
-             //2 hcn colliding
-            function isColliding(a,b){
-                return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
-            }
-
-            // thêm select class cho hình đc chọn
-            function addSelect(img){
-                img.classList.add("file-selected");
-            }
-
-            // remove
-            function removeSelect(img){
-                img.classList.remove("file-selected");
-            }
-
-            // tìm hình đc chọn trong vùng draw
-            function findSelect(){
-                var rect = document.getElementsByClassName("wimage-thumbnail-group");    
-                var posSVG = svg.getBoundingClientRect();
-                var l = rect.length;
-                for(var i = l ;i--;){
-                    var posRect = rect[i].getBoundingClientRect();
-                    if(isColliding(posSVG,posRect)){
-                        addSelect(rect[i]);
-                    }else{
-                       removeSelect(rect[i]);
-                    }
-                }
-            }
-            
-            // reset lại tất cả các file đc chọn
-            function resetSelected(){
-                var listE = document.getElementsByClassName("file-selected");
-                var length  = listE.length;
-                for(var i= length ; i-- ;){
-                    removeSelect(listE[i]);
-                }
-            }
-
-            function findSelected(target){
-                var classList = target.classList;
-                if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
-                    return target.parentNode.parentNode;
-                }
-                if(classList.contains("ellipsis")){
-                    return target.parentNode;
-                }
-                if(classList.contains("wimage-thumbnail-wrapper")){
-                    return target.parentNode;
-                }
-                if(classList.contains("wimage-thumbnail-group")){
-                    return target;
-                }
-                return null;
-            }
-
-            // có ít nhất 1 file dc chọn
-            function isSelected(){
-                var temp = document.getElementsByClassName("file-selected");
-                if(temp.length === 0){
-                    return false;
-                }
-                return temp.length;
-            }
-
-            // active các nút delete move rename nếu có ít nhất 1 file đc chọn
-            function activeButton(btn){
-                var l = isSelected();
-                if(l){
-                    for(var i in btn){
-                        btn[i].classList.remove("disabled");
-                    } 
-                }else{
-                     for(var i in btn){
-                        btn[i].classList.add("disabled");
-                    }
-                }
-                if(l === 1){
-                    document.getElementById("wimage-btn-rename").classList.remove("disabled");
-                }else{
-                     document.getElementById("wimage-btn-rename").classList.add("disabled");
-                }         
-            }
-
-            /**
-             * ---------------------------------
-             */
-
-            //get button 
-            var btnDelete = document.getElementById("wimage-btn-delete");
-            var btnMove = document.getElementById("wimage-btn-move");
-            var btnRename = document.getElementById("wimage-btn-rename");
-            
-
-            /**
-             * ------------------------------------
-             */
-
-            // for draw and choose file
-            main.addEventListener("mousedown",function(event){
-                start.x = event.clientX;
-                start.y = event.clientY;
-                // add class active user-select
-                main.classList.add("wimage-content-active");
-                // hiển thi khung svg
-                svg.style.display = "block";
-
-                main.addEventListener("mousemove",move); 
-                main.addEventListener("mouseup",removeAnimation);
-                resetSelected();
-            });
-            /**
-             * ---------------------------------------
-             */
-            
-            // add popup menu
-            var modal = createPopup("myModal",["Are you sure ??? "],[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
-            ]);
-
-            var renamePopup = createPopupRename("renamePopup",[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
-            ]);
-
-            nav.appendChild(modal);
-            nav.appendChild(renamePopup);
-
-            function addMultiSelect(target,length){
-                for(var i = length ; i-- ;){
-                    addSelect(target[i]);
-                }
-            }
-
-            function deleteSelected(){
-                var selected = document.getElementsByClassName("file-selected");
-                var length = selected.length;
-                for(var i = length; i-- ;){
-                    var grandParent = selected[i].parentNode;
-                    var hugeParent = grandParent.parentNode;
-                    hugeParent.removeChild(grandParent);
-                }
-                activeButton([btnDelete,btnMove,btnRename]);
-            }
-                   
-            //set popup
-            function setPopup(node,toggle,target){
-                node.setAttribute("data-toggle", toggle);
-                node.setAttribute("data-target", target);
-            }
-
-            setPopup(btnDelete,"modal","#myModal");
-            setPopup(btnRename,"modal","#renamePopup");
-
-            //stop event
-            function disabled(e){
-                e = (e) ? e : window.event;
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-             // click envent
-            function clickHandler(){
-            
-                main.addEventListener('click',function(e){
-                    var target = findSelected(e.target);   
-                    if(target){
-                       addSelect(target);
-                       activeButton([btnDelete,btnMove,btnRename]);
-                    }            
-                });
-
-                btnDelete.addEventListener("click",function(e){
-                    if(isSelected()){
-                        var confirm = document.getElementById("wimage-modal-confirm");
-                        confirm.addEventListener("click",function(e){            
-                            var data = e.target;
-                            if(data.id === "wimage-delete-agree"){
-                                deleteSelected();
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
-
-                btnRename.addEventListener("click",function(e){
-                    var selected = document.getElementsByClassName("file-selected");
-                    if(selected.length === 1){
-                        var sameName = document.getElementById("wimage-rename-samename");
-                        sameName.style.visibility = "hidden";
-                        var target = selected[0];
-                        var name = target.lastChild.firstChild.nodeValue;
-                        var inputName = document.getElementById("nameValue");
-                        inputName.value = name;
-                        var confirm = document.getElementById("wimage-rename-agree");
-                        confirm.addEventListener("click",function(e){ 
-                            var tempSelected = document.getElementsByClassName("file-selected"); 
-                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
-                            var newName = inputName.value;
-                            if(isMatch(newName,"ellipsis")){
-                                if(newName !== tempName){
-                                    sameName.style.visibility = "visible";
-                                    e.stopPropagation();
-                                }                    
-                            }else{
-                                tempSelected[0].lastChild.firstChild.nodeValue = newName;    
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
-
-            }   
-
-            clickHandler();
-
-            /**
-             * Button
-             * -------------------------------------
-             */
-
-            var keyboard = {
-                detectKeyboard: function(event){
-                    event = (event) ? event : window.event;
-                    if(event.ctrlKey){
-                        switch(event.keyCode){
-                            case 65: return "ctrlA";
-                            case 67: return "ctrlC";
-                            case 86: return "ctrlV";
-                            case 88: return "ctrlX"; 
-                            case 90: return "ctrlZ";  
-                        }
-                    }else{
-                        switch(event.keyCode){
-                            case 46: return "delete";
-                            case 8: return "backspace";
-                            case 13: return "enter"; 
-                        } 
-                    }
-                    return null;
-                }
-            };
-
-            
-           
-            document.addEventListener("keydown",function(event){
-                var body = document.body;
-                body.classList.add("non-select");
-                var selectables = document.getElementsByClassName("wimage-thumbnail-group");
-                var length = selectables.length;
-                var target = event.target;
-                if(target.nodeName !== "INPUT"){
-
-
-                    switch(keyboard.detectKeyboard(event)){
-                        case "ctrlA":{       
-                            addMultiSelect(selectables,length);
-                            activeButton([btnDelete,btnMove,btnRename]);
-                        }break;
-                        case "backspace":{
-                            var temp = confirm("Do you want to leave this page ?");
-                            if(!temp){
-                                event.preventDefault();
-                            }
-                        }break;
-                        case "delete":{                  
-                            btnDelete.click();
-                        }break;
-                    }
-
-                    document.addEventListener("keyup",function(){
-                        body.classList.remove("non-select");
-                    });
-
-                }
-
-            });
-
-         /**
-         * END Button
-         * -------------------------------------
-         */
-
-        }
-
-        selectFile();
-
-        /*
-        * -------------
-        * Keyboard event 
-        * -------------
-        */
-  
 
         /*
         * -------------
         * context menu 
         * -------------
         */
+        var globalBody = document.getElementsByClassName("wimage-group")[0];
+        var main = globalBody.lastChild;
+        var nav  = globalBody.firstChild;
         function contextMenu() {
           var cMenuTitle = {
                              default: {
@@ -1245,6 +880,428 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         }
         contextMenu();
+
+        /*
+        * -------------
+        * select files 
+        * -------------
+        */
+
+        var output = document.getElementById("wimage-list");
+        
+
+        function selectFile() {
+
+            //set attributes for SVG
+            function setAttribute(el,attr){
+                for(var i in attr){
+                    el.setAttributeNS(null,i,attr[i]);
+                }
+            }
+            // craate SVG element
+            function createSVG(tag,attr){
+                var ns = "http://www.w3.org/2000/svg";
+                var svg = document.createElementNS(ns,tag);
+                var rect = document.createElementNS(ns,"rect");
+                setAttribute(rect,{width: "100%",height: "100%"});
+                setAttribute(svg,attr);
+                svg.appendChild(rect);
+                return svg;
+            }
+
+            var attr = {width: 0,height: 0,viewBox: "0 0 0 0"};
+            var svg = createSVG("svg",attr);
+            main.appendChild(svg);
+
+            var start = {},delta = {},newPos = {},tran = {};
+
+            // update lại khung ảnh svg
+            function updatePosition(){
+                svg.style.transform = "translate(" + tran.x + "px, " + tran.y + "px)";
+                attr = {
+                    width: newPos.x,
+                    height: newPos.y,
+                    viewBox: "0 0 " + newPos.x + " " + newPos.y
+                };
+                setAttribute(svg,attr);
+            }
+
+            // wrap 
+            function move(e){
+                findSelect();
+                e = (e) ? e : window.event;
+                // tìm đoạn di chuyển con trỏ
+                delta.x = Math.abs(e.clientX - start.x);
+                delta.y = Math.abs(e.clientY - start.y);
+
+                // nếu di chuyển theo chiều thuận thì k dời điểm bắt đầu, ng lại dời
+                tran.x = (e.clientX > start.x) ? start.x : (start.x - delta.x);
+                tran.y = (e.clientY > start.y) ? start.y : (start.y - delta.y);
+
+                // độ dài và rộng svg
+                newPos.x = delta.x;
+                newPos.y = delta.y;
+                updatePosition();
+            }
+
+            function removeAnimation(){
+                main.removeEventListener("mousemove", move);
+                attr = {width: 0,height: 0, viewBox: "0 0 0 0"};
+                setAttribute(svg,attr);
+                svg.style.display = "none";
+                main.classList.remove("wimage-content-active");
+
+                activeButton([btnDelete,btnMove,btnRename]);
+            }
+
+            /**
+             * Valid and deal with select
+             */
+
+             //2 hcn colliding
+            function isColliding(a,b){
+                return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
+            }
+
+            // thêm select class cho hình đc chọn
+            function addSelect(img){
+                if(img.id !== "wimage-back-path"){
+                    img.classList.add("file-selected");
+                }   
+            }
+
+            // remove
+            function removeSelect(img){
+                img.classList.remove("file-selected");
+            }
+
+            // tìm hình đc chọn trong vùng draw
+            function findSelect(){
+                var rect = document.getElementsByClassName("wimage-thumbnail-group");    
+                var posSVG = svg.getBoundingClientRect();
+                var l = rect.length;
+                for(var i = l ;i--;){
+                    var posRect = rect[i].getBoundingClientRect();
+                    if(isColliding(posSVG,posRect)){
+                            addSelect(rect[i]);        
+                    }else{
+                       removeSelect(rect[i]);
+                    }
+                }
+            }
+            
+            // reset lại tất cả các file đc chọn
+            function resetSelected(){
+                var listE = document.getElementsByClassName("file-selected");
+                var length  = listE.length;
+                for(var i= length ; i-- ;){
+                    removeSelect(listE[i]);
+                }
+            }
+
+            function findSelected(target){
+                var classList = target.classList;
+                if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
+                    return target.parentNode.parentNode;
+                }
+                if(classList.contains("ellipsis")){
+                    return target.parentNode;
+                }
+                if(classList.contains("wimage-thumbnail-wrapper")){
+                    return target.parentNode;
+                }
+                if(classList.contains("wimage-thumbnail-group")){
+                    return target;
+                }
+                return null;
+            }
+
+            // có ít nhất 1 file dc chọn
+            function isSelected(){
+                var temp = document.getElementsByClassName("file-selected");
+                if(temp.length === 0){
+                    return false;
+                }
+                return temp.length;
+            }
+
+            // active các nút delete move rename nếu có ít nhất 1 file đc chọn
+            function activeButton(btn){
+                var l = isSelected();
+                if(l){
+                    for(var i in btn){
+                        btn[i].classList.remove("disabled");
+                    } 
+                }else{
+                     for(var i in btn){
+                        btn[i].classList.add("disabled");
+                    }
+                }
+                if(l === 1){
+                    document.getElementById("wimage-btn-rename").classList.remove("disabled");
+                }else{
+                     document.getElementById("wimage-btn-rename").classList.add("disabled");
+                }         
+            }
+
+            /**
+             * ---------------------------------
+             */
+
+            //get button 
+            var btnDelete = document.getElementById("wimage-btn-delete");
+            var btnMove = document.getElementById("wimage-btn-move");
+            var btnRename = document.getElementById("wimage-btn-rename");
+            
+
+            /**
+             * ------------------------------------
+             */
+
+            // for draw and choose file
+            main.addEventListener("mousedown",function(event){
+                start.x = event.clientX;
+                start.y = event.clientY;
+                // add class active user-select
+                main.classList.add("wimage-content-active");
+                // hiển thi khung svg
+                svg.style.display = "block";
+
+                main.addEventListener("mousemove",move); 
+                main.addEventListener("mouseup",removeAnimation);
+                resetSelected();
+            });
+            /**
+             * ---------------------------------------
+             */
+            
+            // add popup menu
+            var modal = createPopup("myModal",["Are you sure ??? "],[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
+            ]);
+
+            var renamePopup = createPopupRename("renamePopup",[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
+            ]);
+
+            nav.appendChild(modal);
+            nav.appendChild(renamePopup);
+
+            function addMultiSelect(target,length){
+                for(var i = length ; i-- ;){
+                    addSelect(target[i]);
+                }
+            }
+
+            function deleteSelected(){
+                var selected = document.getElementsByClassName("file-selected");
+                var length = selected.length;
+                for(var i = length; i-- ;){
+                    var grandParent = selected[i].parentNode;
+                    var hugeParent = grandParent.parentNode;
+                    hugeParent.removeChild(grandParent);
+                }
+                activeButton([btnDelete,btnMove,btnRename]);
+            }
+                   
+            //set popup
+            function setPopup(node,toggle,target){
+                node.setAttribute("data-toggle", toggle);
+                node.setAttribute("data-target", target);
+            }
+
+            setPopup(btnDelete,"modal","#myModal");
+            setPopup(btnRename,"modal","#renamePopup");
+
+            //stop event
+            function disabled(e){
+                e = (e) ? e : window.event;
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+             // click envent
+            function clickHandler(){
+            
+                main.addEventListener('click',function(e){
+                    var target = findSelected(e.target);   
+                    if(target){
+                       addSelect(target);
+                       activeButton([btnDelete,btnMove,btnRename]);
+                    }            
+                });
+
+                btnDelete.addEventListener("click",function(e){
+                    if(isSelected()){
+                        var confirm = document.getElementById("wimage-modal-confirm");
+                        confirm.addEventListener("click",function(e){            
+                            var data = e.target;
+                            if(data.id === "wimage-delete-agree"){
+                                deleteSelected();
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                btnRename.addEventListener("click",function(e){
+                    var selected = document.getElementsByClassName("file-selected");
+                    if(selected.length === 1){
+                        var sameName = document.getElementById("wimage-rename-samename");
+                        sameName.style.visibility = "hidden";
+                        var target = selected[0];
+                        var name = target.lastChild.firstChild.nodeValue;
+                        var inputName = document.getElementById("nameValue");
+                        inputName.value = name;
+                        var confirm = document.getElementById("wimage-rename-agree");
+                        confirm.addEventListener("click",function(e){ 
+                            var tempSelected = document.getElementsByClassName("file-selected"); 
+                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
+                            var newName = inputName.value;
+                            if(isMatch(newName,"ellipsis")){
+                                if(newName !== tempName){
+                                    sameName.style.visibility = "visible";
+                                    e.stopPropagation();
+                                }                    
+                            }else{
+                                tempSelected[0].lastChild.firstChild.nodeValue = newName;    
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                function createBackImage(src){
+                    var content = "<span>";
+                    content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail" src="';
+                    content += src;
+                    content += '"/></div><p class="ellipsis">&nbsp;</p></div>';
+                    return content;
+                }   
+
+                var TEMP_OUTPUT;
+                var wimagePath = document.getElementById("wimage-back-foldername");
+                var wimageCreateFolder = document.getElementById("wimage-createFolder");
+                var contextDefaultMenu = document.getElementById("contextMenu");
+                var childCreateFolder  = contextDefaultMenu.firstChild;
+
+                // open folder
+                main.addEventListener("dblclick",function(e){
+                    var target = findSelected(e.target);
+                    //if double click on foler 
+                    if(target && target.classList.contains("wimage-item-folder")){  
+                        TEMP_OUTPUT = output.innerHTML;            
+                        output.innerHTML = null;
+                        var backImg = createBackImage("assets/images/enter.png");
+                        output.innerHTML = backImg; 
+                        var nameFolder = target.lastChild.firstChild.nodeValue;
+                        // create only 1 level folder
+                        wimagePath.previousSibling.style.display = "block";
+                        wimagePath.innerHTML = nameFolder;
+                        wimageCreateFolder.classList.add("disabled");
+                        contextDefaultMenu.removeChild(childCreateFolder);
+                    }
+                    var backPath = document.getElementById("wimage-back-path");
+                    if(backPath){
+                        backPath.addEventListener("click",function(e){
+                            disabled(e); 
+                        });
+                        backPath.addEventListener("dblclick",function(e){
+                            output.innerHTML = null;
+                            output.innerHTML = TEMP_OUTPUT;
+                            wimagePath.previousSibling.style.display = "none";
+                            wimagePath.innerHTML = null;
+                            wimageCreateFolder.classList.remove("disabled");
+                            contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
+                        });
+                    }
+                   
+                });
+
+                // window.onbeforeunload = function() {
+                //     return "You want to leave this site !";
+                // }
+    
+            }   
+
+            clickHandler();
+
+            /**
+             * Button
+             * -------------------------------------
+             */
+
+            var keyboard = {
+                detectKeyboard: function(event){
+                    event = (event) ? event : window.event;
+                    if(event.ctrlKey){
+                        switch(event.keyCode){
+                            case 65: return "ctrlA";
+                            case 67: return "ctrlC";
+                            case 86: return "ctrlV";
+                            case 88: return "ctrlX"; 
+                            case 90: return "ctrlZ";  
+                        }
+                    }else{
+                        switch(event.keyCode){
+                            case 46: return "delete";
+                            case 8: return "backspace";
+                            case 13: return "enter"; 
+                        } 
+                    }
+                    return null;
+                }
+            };
+
+            
+           
+            document.addEventListener("keydown",function(event){
+                var body = document.body;
+                body.classList.add("non-select");
+                var selectables = document.getElementsByClassName("wimage-thumbnail-group");
+                var length = selectables.length;
+                var target = event.target;
+                if(target.nodeName !== "INPUT"){
+
+                    switch(keyboard.detectKeyboard(event)){
+                        case "ctrlA":{       
+                            addMultiSelect(selectables,length);
+                            activeButton([btnDelete,btnMove,btnRename]);
+                        }break;
+                        case "delete":{                  
+                            btnDelete.click();
+                        }break;
+                    }
+
+                    document.addEventListener("keyup",function(){
+                        body.classList.remove("non-select");
+                    });
+
+                }
+
+            });
+
+         /**
+         * END Button
+         * -------------------------------------
+         */
+
+        }
+
+        selectFile();
+
+        /*
+        * -------------
+        * Keyboard event 
+        * -------------
+        */
+  
+
+
 
         /*
         * -------------
