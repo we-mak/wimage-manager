@@ -34,6 +34,7 @@ Please join with me if you have time.
 - List/Grid view 
 - Editor: rename, change folder, delete.
 - Generate unique file name 
+- File size limit
 
 ### Dependencies 
 - Bootstrap 3.* components
@@ -41,10 +42,9 @@ Please join with me if you have time.
 
 ### Todos 
 - Data storage
-- File size limit
 - upload files per time limit.
-- Language
-- ....more
+- language path
+- ....more to come
 
 ### In progress 
 - Selectable: click to select, multiple drag select, keyboard select.
@@ -52,16 +52,16 @@ Please join with me if you have time.
 - Apply action in context menu 
 
 ### Bugs
-- Selected item not remove select when click/drag outside the item. 
+- Drag select when scrolling can't select files, and drag zone being a square.
 
-## Changelogs
-
+## Changelogs/bugs fixed
+- Selected item not remove select when click/drag outside the item. --- fixed
 
 # Authors 
 
 #####we-mak 
 - sean https://github.com/viiiprock
-- huuphuocphanhttps://github.com/Huuphuoc19
+- huuphuoc https://github.com/Huuphuoc19
 - luan https://github.com/luanphan1994
 - special thanks to rgv151 https://github.com/rgv151 for some advices 
 
