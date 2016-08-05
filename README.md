@@ -31,6 +31,9 @@ Please join with me if you have time.
 - Image upload
 - Progress loader
 - Create folder
+- List/Grid view 
+- Editor: rename, change folder, delete.
+- Generate unique file name 
 
 ### Dependencies 
 - Bootstrap 3.* components
@@ -38,12 +41,9 @@ Please join with me if you have time.
 
 ### Todos 
 - Data storage
-- List/Grid view 
-- Editor: rename, change folder, delete.
 - File size limit
 - upload files per time limit.
 - Language
-- Generate unique file name 
 - ....more
 
 ### In progress 
@@ -61,8 +61,9 @@ Please join with me if you have time.
 
 #####we-mak 
 - sean https://github.com/viiiprock
-- rgv151 https://github.com/rgv151
+- huuphuocphanhttps://github.com/Huuphuoc19
 - luan https://github.com/luanphan1994
+- special thanks to rgv151 https://github.com/rgv151 for some advices 
 
 
 
