@@ -26,9 +26,11 @@ Please join with me if you have time.
 ### Contribute welcome
 - Report bugs
 - App enhancement
+
 ### Dependencies 
 - Bootstrap 3.* components
 - Fontawesome icons
+
 ### How to use:
 
 
