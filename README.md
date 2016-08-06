@@ -26,6 +26,11 @@ Please join with me if you have time.
 ### Contribute welcome
 - Report bugs
 - App enhancement
+### Dependencies 
+- Bootstrap 3.* components
+- Fontawesome icons
+### How to use:
+
 
 ### Features 
 - Image upload
@@ -37,12 +42,10 @@ Please join with me if you have time.
 - File size limit
 - Multiple right click context menu
 - Apply action in context menu 
-### Dependencies 
-- Bootstrap 3.* components
-- Fontawesome icons
+- 
 
 ### Todos 
-- Data storage
+- Data storage: JSON data sample.
 - upload files per time limit.
 - language path
 - ....more to come
@@ -52,6 +55,7 @@ Please join with me if you have time.
 
 ### Bugs
 - Drag select when scrolling can't select files, and drag zone being a square.
+- UX: When inside folder, just need one click on back to home.
 
 ## Changelogs/bugs fixed
 - Selected item not remove select when click/drag outside the item. --- fixed
@@ -59,7 +63,7 @@ Please join with me if you have time.
 # Authors 
 
 #####we-mak 
-- sean https://github.com/viiiprock
+- sondang https://github.com/viiiprock
 - huuphuoc https://github.com/Huuphuoc19
 - luan https://github.com/luanphan1994
 - special thanks to rgv151 https://github.com/rgv151 for some advices 
