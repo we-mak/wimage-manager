@@ -35,7 +35,8 @@ Please join with me if you have time.
 - Editor: rename, change folder, delete.
 - Generate unique file name 
 - File size limit
-
+- Multiple right click context menu
+- Apply action in context menu 
 ### Dependencies 
 - Bootstrap 3.* components
 - Fontawesome icons
@@ -47,9 +48,7 @@ Please join with me if you have time.
 - ....more to come
 
 ### In progress 
-- Selectable: click to select, multiple drag select, keyboard select.
-- Multiple right click context menu
-- Apply action in context menu 
+- Selectable: keyboard select.
 
 ### Bugs
 - Drag select when scrolling can't select files, and drag zone being a square.
