@@ -42,7 +42,6 @@ Please join with me if you have time.
 - File size limit
 - Multiple right click context menu
 - Apply action in context menu 
-- 
 
 ### Todos 
 - Data storage: JSON data sample.
