@@ -507,7 +507,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
 
                 var folder = document.createElement('span');
-                folder.innerHTML = ['<div class="wimage-thumbnail-group wimage-item-folder"'+ display +'><div class="wimage-thumbnail-wrapper'+ listView.img +'">' + folderIcon + '</div><p class="ellipsis '+ listView.name +'" id="wimage-filename">' + fileName() + '</p></div>'];
+                var folderNameGet = fileName();
+                folder.innerHTML = ['<div class="wimage-thumbnail-group wimage-item-folder"'+ display +'><div class="wimage-thumbnail-wrapper'+ listView.img +'">' + folderIcon + '</div><p class="ellipsis '+ listView.name +'" id="wimage-filename" title="'+ folderNameGet +'">' + folderNameGet + '</p></div>'];
                 document.getElementById('wimage-list').insertBefore(folder, null); 
             }
           });
@@ -692,8 +693,14 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         activeNode(target.node);
                     }break;
                     case "wimage-item-image":{
-                        turnOn(e,imageMenu);
-                        activeNode(target.node);
+                        if(target.node.id !== "wimage-back-path"){
+                            turnOn(e,imageMenu);
+                            activeNode(target.node);
+                        }else{
+                            e.stopPropagation();
+                            e.preventDefault();
+                        }
+                        
                     }break;
                     default:
                         turnOn(e,menu);
@@ -1167,7 +1174,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                                     e.stopPropagation();
                                 }                    
                             }else{
-                                tempSelected[0].lastChild.firstChild.nodeValue = newName;    
+                                var tempNodeName = tempSelected[0].lastChild;
+                                tempNodeName.firstChild.nodeValue = newName;
+                                tempNodeName.setAttribute("title",newName);   
                             }
                         });
                     }else{
@@ -1179,7 +1188,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     var content = "<span>";
                     content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail" src="';
                     content += src;
-                    content += '"/></div><p class="ellipsis">&nbsp;</p></div>';
+                    content += '"/></div><p class="ellipsis">Back</p></div>';
                     return content;
                 }   
 
@@ -1204,6 +1213,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         wimagePath.innerHTML = nameFolder;
                         wimageCreateFolder.classList.add("disabled");
                         contextDefaultMenu.removeChild(childCreateFolder);
+                        activeButton([btnDelete,btnMove,btnRename]);
                     }
                     var backPath = document.getElementById("wimage-back-path");
                     if(backPath){
@@ -1217,6 +1227,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                             wimagePath.innerHTML = null;
                             wimageCreateFolder.classList.remove("disabled");
                             contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
+                            activeButton([btnDelete,btnMove,btnRename]);
                         });
                     }
                    
@@ -1256,9 +1267,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     return null;
                 }
             };
-
-            
-           
+     
             document.addEventListener("keydown",function(event){
                 var body = document.body;
                 body.classList.add("non-select");
