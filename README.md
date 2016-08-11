@@ -27,42 +27,47 @@ Please join with me if you have time.
 - Report bugs
 - App enhancement
 
-### Features 
-- Image upload
-- Progress loader
-- Create folder
-
 ### Dependencies 
 - Bootstrap 3.* components
 - Fontawesome icons
 
-### Todos 
-- Data storage
+### How to use:
+
+
+### Features 
+- Image upload
+- Progress loader
+- Create folder
 - List/Grid view 
 - Editor: rename, change folder, delete.
-- File size limit
-- upload files per time limit.
-- Language
 - Generate unique file name 
-- ....more
-
-### In progress 
-- Selectable: click to select, multiple drag select, keyboard select.
+- File size limit
 - Multiple right click context menu
 - Apply action in context menu 
 
+### Todos 
+- Data storage: JSON data sample.
+- upload files per time limit.
+- language path
+- ....more to come
+
+### In progress 
+- Selectable: keyboard select.
+
 ### Bugs
-- Selected item not remove select when click/drag outside the item. 
+- Drag select when scrolling can't select files, and drag zone being a square.
+- UX: When inside folder, just need one click on back to home.
 
-## Changelogs
-
+## Changelogs/bugs fixed
+- Selected item not remove select when click/drag outside the item. --- fixed
 
 # Authors 
 
 #####we-mak 
-- sean https://github.com/viiiprock
-- rgv151 https://github.com/rgv151
+- sondang https://github.com/viiiprock
+- huuphuoc https://github.com/Huuphuoc19
 - luan https://github.com/luanphan1994
+- special thanks to rgv151 https://github.com/rgv151 for some advices 
 
 
 

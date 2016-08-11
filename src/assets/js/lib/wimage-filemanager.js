@@ -2,9 +2,10 @@
  * =====================================================
  * File Manager
  * Sean 
- * Bruce Doan https://github.com/rgv151
+ * Huu Phuoc 
  * Luanphan1994 
- * Version 0.1 WIP - 15 April 2016
+ * special thanks to Bruce Doan
+ * Version 0.5 - 5 August 2016
  * =====================================================
  */
 // Check for the various File API support.
