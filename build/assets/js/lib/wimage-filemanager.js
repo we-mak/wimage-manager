@@ -2,9 +2,10 @@
  * =====================================================
  * File Manager
  * Sean 
- * Bruce Doan https://github.com/rgv151
+ * Huu Phuoc 
  * Luanphan1994 
- * Version 0.1 WIP - 15 April 2016
+ * special thanks to Bruce Doan
+ * Version 1.0 Beta - 5 August 2016
  * =====================================================
  */
 // Check for the various File API support.
@@ -1210,7 +1211,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         backPath.addEventListener("click",function(e){
                             disabled(e); 
                         });
-                        backPath.addEventListener("dblclick",function(e){
+                        backPath.addEventListener("click",function(e){
                             output.innerHTML = null;
                             output.innerHTML = TEMP_OUTPUT;
                             wimagePath.previousSibling.style.display = "none";
@@ -1347,6 +1348,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             });
         }
         switchView();
+
         /*
         * -------------
         * edit file 
@@ -1357,6 +1359,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               fileDelete,
               fileMove;
         }
+        
         /*
         * --------------------
         * exploring the folder 

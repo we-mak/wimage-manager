@@ -5,7 +5,7 @@
  * Huu Phuoc 
  * Luanphan1994 
  * special thanks to Bruce Doan
- * Version 0.5 - 5 August 2016
+ * Version 1.0 Beta - 5 August 2016
  * =====================================================
  */
 // Check for the various File API support.
@@ -1211,7 +1211,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         backPath.addEventListener("click",function(e){
                             disabled(e); 
                         });
-                        backPath.addEventListener("dblclick",function(e){
+                        backPath.addEventListener("click",function(e){
                             output.innerHTML = null;
                             output.innerHTML = TEMP_OUTPUT;
                             wimagePath.previousSibling.style.display = "none";
@@ -1348,6 +1348,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             });
         }
         switchView();
+
         /*
         * -------------
         * edit file 
@@ -1358,6 +1359,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               fileDelete,
               fileMove;
         }
+        
         /*
         * --------------------
         * exploring the folder 
