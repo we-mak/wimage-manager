@@ -272,6 +272,95 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return false;
         }
 
+        // thêm select class cho hình đc chọn
+        function addSelect(img){
+            if(img.id !== "wimage-back-path"){
+                img.classList.add("file-selected");
+            }   
+        }
+
+        // remove
+        function removeSelect(img){
+            img.classList.remove("file-selected");
+        }
+
+         //stop event
+        function disabled(e){
+            e = (e) ? e : window.event;
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // có ít nhất 1 file dc chọn
+        function isSelected(){
+            var temp = document.getElementsByClassName("file-selected");
+            if(temp.length === 0){
+                return false;
+            }
+            return temp.length;
+        }
+
+        // active các nút delete move rename nếu có ít nhất 1 file đc chọn
+        function activeButton(btn){
+            var l = isSelected();
+            if(l){
+                for(var i in btn){
+                    btn[i].classList.remove("disabled");
+                } 
+            }else{
+                 for(var i in btn){
+                    btn[i].classList.add("disabled");
+                }
+            }
+            if(l === 1){
+                document.getElementById("wimage-btn-rename").classList.remove("disabled");
+            }else{
+                 document.getElementById("wimage-btn-rename").classList.add("disabled");
+            }         
+        }
+
+        function findSelected(target){
+            var classList = target.classList;
+            if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
+                return target.parentNode.parentNode;
+            }
+            if(classList.contains("ellipsis")){
+                return target.parentNode;
+            }
+            if(classList.contains("wimage-thumbnail-wrapper")){
+                return target.parentNode;
+            }
+            if(classList.contains("wimage-thumbnail-group")){
+                return target;
+            }
+            return null;
+        }
+
+        /**
+         * trigger event
+         */ 
+        
+        function triggerEvent(el,eventName){
+            var event;
+            if(document.createEvent){
+                event = document.createEvent('HTMLEvents');
+                event.initEvent(eventName,true,true);
+            }else if(document.createEventObject){// IE < 9
+                event = document.createEventObject();
+                event.eventType = eventName;
+            }
+            event.eventName = eventName;
+            if(el.dispatchEvent){
+                el.dispatchEvent(event);
+            }else if(el.fireEvent && htmlEvents['on'+eventName]){// IE < 9
+                el.fireEvent('on'+event.eventType,event);// can trigger only real event (e.g. 'click')
+            }else if(el[eventName]){
+                el[eventName]();
+            }else if(el['on'+eventName]){
+                el['on'+eventName]();
+            }
+        }
+
         /*
         * --------------------
         * Initialize Main DOM
@@ -523,6 +612,13 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var globalBody = document.getElementsByClassName("wimage-group")[0];
         var main = globalBody.lastChild;
         var nav  = globalBody.firstChild;
+
+         //get button for global
+        var btnDelete = document.getElementById("wimage-btn-delete");
+        var btnMove = document.getElementById("wimage-btn-move");
+        var btnRename = document.getElementById("wimage-btn-rename");
+        var btnUpload = document.getElementById("file");
+
         function contextMenu() {
           var cMenuTitle = {
                              default: {
@@ -558,35 +654,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                              del: '<i class="fa fa-trash"></i>'
                            }
           };
-
-          // Type of menu
-          //To do: variables menu 
-          // var cMenuTemp = function() {
-          //   var clickTo = document.getElementById("list");
-          //   clickTo.addEventListener("click",function() {
-          //     if (e.target) {
-          //       var target = false;
-          //       if (e.target.matches("div.wimage-thumbnail-wrapper")) {
-          //         target = e.target;
-          //       } else {
-          //         target = find("div.wimage-thumbnail-wrapper", e.target);
-          //       }
-          //       if (!target) {
-          //         return;
-          //       }
-          //     }
-          //   });
-          // };
-          // switch (cMenuTemp) {
-          //   case "general": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"<li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button">' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>'); 
-          //   break;
-          //   case "folder": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button">'  + cMenuIcons.folder.explore + cMenuTitle.folder.explore +'</button></li><li><button class="context-menu-item-button">' + cMenuIcons.folder.editName + cMenuTitle.folder.editName + '</button><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.folder.del + cMenuTitle.folder.del + '</button></li></li></menu>');
-          //   break;
-          //   case "image": document.write('<menu class="context-menu dropdown-menu" id="contextMenu"><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + '</button></li><li class="context-menu-item"><button class="context-menu-item-button"' + cMenuIcons.default.upLoad + cMenuTitle.default.upload + '</button></li></menu>');
-          //   break;
-          //   default: ""
-          // }
-
 
         var menuStart = '<menu class="context-menu dropdown-menu" ';
         var menuEnd = '</menu>';
@@ -691,11 +758,14 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     case "wimage-item-folder":{
                         turnOn(e,folderMenu);
                         activeNode(target.node);
+                        target.node.classList.add("wimage-slide-active");
                     }break;
                     case "wimage-item-image":{
                         if(target.node.id !== "wimage-back-path"){
                             turnOn(e,imageMenu);
                             activeNode(target.node);
+                            var childImg = target.node.firstChild.firstChild;
+                            childImg.classList.add("wimage-slide-active");
                         }else{
                             e.stopPropagation();
                             e.preventDefault();
@@ -718,6 +788,10 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 var button = e.which || e.button;
                 if (button === 1) {
                     turnOff();
+                    var temp = document.getElementsByClassName("wimage-slide-active");
+                    if(temp && temp[0]){
+                        temp[0].classList.remove("wimage-slide-active");
+                    }
                 }
               }
             });
@@ -771,6 +845,13 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             toggleMenuOff(menu);
             toggleMenuOff(imageMenu);
             toggleMenuOff(folderMenu);
+            var temp = document.getElementsByClassName("wimage-slide-active");
+            if(temp){
+                var l = temp.length;
+                for(var i = 0 ; i < l ; i++){
+                    temp[i].classList.remove("wimage-slide-active");
+                }
+            }
         }
 
         // Menu position
@@ -823,10 +904,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }  
 
                 var btnCreateFolder = document.getElementById("wimage-createFolder");
-                var btnUpload = document.getElementById("file");
-                var btnDelete = document.getElementById("wimage-btn-delete");
-                var btnRename = document.getElementById("wimage-btn-rename");
-
+               
                 defaultItemMenu.addEventListener("click",function(e){
                     var target = getTargetContext(e);
                     if(target){
@@ -848,7 +926,11 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         var value = target.value;
                         switch(value){
                             case "preview":{
-                                
+                                var dblclick = document.getElementsByClassName("wimage-slide-active");
+                                if(dblclick){
+                                    dblclick = dblclick[0];
+                                    triggerEvent(dblclick,"dblclick");
+                                }
                             }break;
                             case "editName":{
                                 btnRename.click();
@@ -869,7 +951,11 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         var value = target.value;
                         switch(value){
                             case "explore":{
-                                
+                                var dblclick = document.getElementsByClassName("wimage-slide-active");
+                                if(dblclick){
+                                    dblclick = dblclick[0];
+                                    triggerEvent(dblclick,"dblclick");
+                                }
                             }break;
                             case "editName":{
                                 btnRename.click();
@@ -896,7 +982,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         var output = document.getElementById("wimage-list");
         
-
         function selectFile() {
 
             //set attributes for SVG
@@ -951,13 +1036,15 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 updatePosition();
             }
 
+        
+            
+
             function removeAnimation(){
                 main.removeEventListener("mousemove", move);
                 attr = {width: 0,height: 0, viewBox: "0 0 0 0"};
                 setAttribute(svg,attr);
                 svg.style.display = "none";
                 main.classList.remove("wimage-content-active");
-
                 activeButton([btnDelete,btnMove,btnRename]);
             }
 
@@ -970,17 +1057,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 return (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top);
             }
 
-            // thêm select class cho hình đc chọn
-            function addSelect(img){
-                if(img.id !== "wimage-back-path"){
-                    img.classList.add("file-selected");
-                }   
-            }
-
-            // remove
-            function removeSelect(img){
-                img.classList.remove("file-selected");
-            }
+            
 
             // tìm hình đc chọn trong vùng draw
             function findSelect(){
@@ -1006,65 +1083,14 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
             }
 
-            function findSelected(target){
-                var classList = target.classList;
-                if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
-                    return target.parentNode.parentNode;
-                }
-                if(classList.contains("ellipsis")){
-                    return target.parentNode;
-                }
-                if(classList.contains("wimage-thumbnail-wrapper")){
-                    return target.parentNode;
-                }
-                if(classList.contains("wimage-thumbnail-group")){
-                    return target;
-                }
-                return null;
-            }
 
-            // có ít nhất 1 file dc chọn
-            function isSelected(){
-                var temp = document.getElementsByClassName("file-selected");
-                if(temp.length === 0){
-                    return false;
-                }
-                return temp.length;
-            }
 
-            // active các nút delete move rename nếu có ít nhất 1 file đc chọn
-            function activeButton(btn){
-                var l = isSelected();
-                if(l){
-                    for(var i in btn){
-                        btn[i].classList.remove("disabled");
-                    } 
-                }else{
-                     for(var i in btn){
-                        btn[i].classList.add("disabled");
-                    }
-                }
-                if(l === 1){
-                    document.getElementById("wimage-btn-rename").classList.remove("disabled");
-                }else{
-                     document.getElementById("wimage-btn-rename").classList.add("disabled");
-                }         
-            }
+            
 
             /**
              * ---------------------------------
              */
-
-            //get button 
-            var btnDelete = document.getElementById("wimage-btn-delete");
-            var btnMove = document.getElementById("wimage-btn-move");
-            var btnRename = document.getElementById("wimage-btn-rename");
-            
-
-            /**
-             * ------------------------------------
-             */
-
+    
             // for draw and choose file
             main.addEventListener("mousedown",function(event){
                 start.x = event.clientX;
@@ -1082,19 +1108,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
              * ---------------------------------------
              */
             
-            // add popup menu
-            var modal = createPopup("myModal",["Are you sure ??? "],[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
-            ]);
-
-            var renamePopup = createPopupRename("renamePopup",[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
-            ]);
-
-            nav.appendChild(modal);
-            nav.appendChild(renamePopup);
+            
 
             function addMultiSelect(target,length){
                 for(var i = length ; i-- ;){
@@ -1102,33 +1116,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
             }
 
-            function deleteSelected(){
-                var selected = document.getElementsByClassName("file-selected");
-                var length = selected.length;
-                for(var i = length; i-- ;){
-                    var grandParent = selected[i].parentNode;
-                    var hugeParent = grandParent.parentNode;
-                    hugeParent.removeChild(grandParent);
-                }
-                activeButton([btnDelete,btnMove,btnRename]);
-            }
-                   
-            //set popup
-            function setPopup(node,toggle,target){
-                node.setAttribute("data-toggle", toggle);
-                node.setAttribute("data-target", target);
-            }
-
-            setPopup(btnDelete,"modal","#myModal");
-            setPopup(btnRename,"modal","#renamePopup");
-
-            //stop event
-            function disabled(e){
-                e = (e) ? e : window.event;
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
+           
              // click envent
             function clickHandler(){
             
@@ -1140,98 +1128,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }            
                 });
 
-                btnDelete.addEventListener("click",function(e){
-                    if(isSelected()){
-                        var confirm = document.getElementById("wimage-modal-confirm");
-                        confirm.addEventListener("click",function(e){            
-                            var data = e.target;
-                            if(data.id === "wimage-delete-agree"){
-                                deleteSelected();
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
-
-                btnRename.addEventListener("click",function(e){
-                    var selected = document.getElementsByClassName("file-selected");
-                    if(selected.length === 1){
-                        var sameName = document.getElementById("wimage-rename-samename");
-                        sameName.style.visibility = "hidden";
-                        var target = selected[0];
-                        var name = target.lastChild.firstChild.nodeValue;
-                        var inputName = document.getElementById("nameValue");
-                        inputName.value = name;
-                        var confirm = document.getElementById("wimage-rename-agree");
-                        confirm.addEventListener("click",function(e){ 
-                            var tempSelected = document.getElementsByClassName("file-selected"); 
-                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
-                            var newName = inputName.value;
-                            if(isMatch(newName,"ellipsis")){
-                                if(newName !== tempName){
-                                    sameName.style.visibility = "visible";
-                                    e.stopPropagation();
-                                }                    
-                            }else{
-                                var tempNodeName = tempSelected[0].lastChild;
-                                tempNodeName.firstChild.nodeValue = newName;
-                                tempNodeName.setAttribute("title",newName);   
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
-
-                function createBackImage(src){
-                    var content = "<span>";
-                    content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail" src="';
-                    content += src;
-                    content += '"/></div><p class="ellipsis">Back</p></div>';
-                    return content;
-                }   
-
-                var TEMP_OUTPUT;
-                var wimagePath = document.getElementById("wimage-back-foldername");
-                var wimageCreateFolder = document.getElementById("wimage-createFolder");
-                var contextDefaultMenu = document.getElementById("contextMenu");
-                var childCreateFolder  = contextDefaultMenu.firstChild;
-
-                // open folder
-                main.addEventListener("dblclick",function(e){
-                    var target = findSelected(e.target);
-                    //if double click on foler 
-                    if(target && target.classList.contains("wimage-item-folder")){  
-                        TEMP_OUTPUT = output.innerHTML;            
-                        output.innerHTML = null;
-                        var backImg = createBackImage("assets/images/enter.png");
-                        output.innerHTML = backImg; 
-                        var nameFolder = target.lastChild.firstChild.nodeValue;
-                        // create only 1 level folder
-                        wimagePath.previousSibling.style.display = "block";
-                        wimagePath.innerHTML = nameFolder;
-                        wimageCreateFolder.classList.add("disabled");
-                        contextDefaultMenu.removeChild(childCreateFolder);
-                        activeButton([btnDelete,btnMove,btnRename]);
-                    }
-                    var backPath = document.getElementById("wimage-back-path");
-                    if(backPath){
-                        backPath.addEventListener("click",function(e){
-                            disabled(e); 
-                        });
-                        backPath.addEventListener("dblclick",function(e){
-                            output.innerHTML = null;
-                            output.innerHTML = TEMP_OUTPUT;
-                            wimagePath.previousSibling.style.display = "none";
-                            wimagePath.innerHTML = null;
-                            wimageCreateFolder.classList.remove("disabled");
-                            contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
-                            activeButton([btnDelete,btnMove,btnRename]);
-                        });
-                    }
-                   
-                });
+            
 
                 // window.onbeforeunload = function() {
                 //     return "You want to leave this site !";
@@ -1361,11 +1258,94 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * edit file 
         * -------------
         */
-        function editFile() {
-          var fileRename,
-              fileDelete,
-              fileMove;
+        function editFile() { 
+
+            /**
+             * ------------------------------------
+             */
+            
+            // add popup menu
+            var modal = createPopup("myModal",["Are you sure ??? "],[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
+            ]);
+
+            var renamePopup = createPopupRename("renamePopup",[
+                {id:"wimage-cancel",btn: "default",content: "Cancel"},
+                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
+            ]);
+
+            nav.appendChild(modal);
+            nav.appendChild(renamePopup);
+    
+
+            //set popup
+            function setPopup(node,toggle,target){
+                node.setAttribute("data-toggle", toggle);
+                node.setAttribute("data-target", target);
+            }
+
+            setPopup(btnDelete,"modal","#myModal");
+            setPopup(btnRename,"modal","#renamePopup");
+
+            function deleteSelected(){
+                var selected = document.getElementsByClassName("file-selected");
+                var length = selected.length;
+                for(var i = length; i-- ;){
+                    var grandParent = selected[i].parentNode;
+                    var hugeParent = grandParent.parentNode;
+                    hugeParent.removeChild(grandParent);
+                }
+                activeButton([btnDelete,btnMove,btnRename]);
+            }
+                   
+             btnDelete.addEventListener("click",function(e){
+                    if(isSelected()){
+                        var confirm = document.getElementById("wimage-modal-confirm");
+                        confirm.addEventListener("click",function(e){            
+                            var data = e.target;
+                            if(data.id === "wimage-delete-agree"){
+                                deleteSelected();
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                btnRename.addEventListener("click",function(e){
+                    var selected = document.getElementsByClassName("file-selected");
+                    if(selected.length === 1){
+                        var sameName = document.getElementById("wimage-rename-samename");
+                        sameName.style.visibility = "hidden";
+                        var target = selected[0];
+                        var name = target.lastChild.firstChild.nodeValue;
+                        var inputName = document.getElementById("nameValue");
+                        inputName.value = name;
+                        var confirm = document.getElementById("wimage-rename-agree");
+                        confirm.addEventListener("click",function(e){ 
+                            var tempSelected = document.getElementsByClassName("file-selected"); 
+                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
+                            var newName = inputName.value;
+                            if(isMatch(newName,"ellipsis")){
+                                if(newName !== tempName){
+                                    sameName.style.visibility = "visible";
+                                    e.stopPropagation();
+                                }                    
+                            }else{
+                                var tempNodeName = tempSelected[0].lastChild;
+                                tempNodeName.firstChild.nodeValue = newName;
+                                tempNodeName.setAttribute("title",newName);   
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
         }
+
+        editFile();
         /*
         * --------------------
         * exploring the folder 
@@ -1373,7 +1353,56 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         */
         function folderXplore() {
 
+            function createBackImage(src){
+                var content = "<span>";
+                content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail wimage-thumbnail-back" src="';
+                content += src;
+                content += '"/></div><p class="ellipsis">Back</p></div>';
+                return content;
+            }   
+
+            var TEMP_OUTPUT;
+            var wimagePath = document.getElementById("wimage-back-foldername");
+            var wimageCreateFolder = document.getElementById("wimage-createFolder");
+            var contextDefaultMenu = document.getElementById("contextMenu");
+            var childCreateFolder  = contextDefaultMenu.firstChild;
+
+            // open folder
+            main.addEventListener("dblclick",function(e){
+                var target = findSelected(e.target);
+                //if double click on foler 
+                if(target && target.classList.contains("wimage-item-folder")){  
+                    TEMP_OUTPUT = output.innerHTML;            
+                    output.innerHTML = null;
+                    var backImg = createBackImage("assets/images/enter.png");
+                    output.innerHTML = backImg; 
+                    var nameFolder = target.lastChild.firstChild.nodeValue;
+                    // create only 1 level folder
+                    wimagePath.previousSibling.style.display = "block";
+                    wimagePath.innerHTML = nameFolder;
+                    wimageCreateFolder.classList.add("disabled");
+                    contextDefaultMenu.removeChild(childCreateFolder);
+                    activeButton([btnDelete,btnMove,btnRename]);
+                }
+                var backPath = document.getElementById("wimage-back-path");
+                if(backPath){
+                    backPath.addEventListener("click",function(e){
+                        disabled(e); 
+                    });
+                    backPath.addEventListener("dblclick",function(e){
+                        output.innerHTML = null;
+                        output.innerHTML = TEMP_OUTPUT;
+                        wimagePath.previousSibling.style.display = "none";
+                        wimagePath.innerHTML = null;
+                        wimageCreateFolder.classList.remove("disabled");
+                        contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
+                        activeButton([btnDelete,btnMove,btnRename]);
+                    });
+                }
+               
+            });
         }
+        folderXplore(); 
 
     })();
     window.WimageFilemanager;
