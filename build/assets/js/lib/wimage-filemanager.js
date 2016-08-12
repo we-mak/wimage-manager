@@ -5,7 +5,7 @@
  * Huu Phuoc 
  * Luanphan1994 
  * special thanks to Bruce Doan
- * Version 0.5 - 5 August 2016
+ * Version 1.0 Beta - 5 August 2016
  * =====================================================
  */
 // Check for the various File API support.
@@ -17,10 +17,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
 (function() {
     "use strict";
-
-    function dump(a){
-      console.log(a);
-    }
 
     var WimageFilemanager = (function() { 
         /* General variables */
@@ -1084,6 +1080,116 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     listE[i].removeAttribute("pointstart");
                 }
             }
+   
+             // click envent
+            function clickHandler(){
+            
+                main.addEventListener('click',function(e){
+                    var target = findSelected(e.target);   
+                    if(target){
+                       addSelect(target);
+                       activeButton([btnDelete,btnMove,btnRename]);
+                    }            
+                });
+
+
+                btnDelete.addEventListener("click",function(e){
+                    if(isSelected()){
+                        var confirm = document.getElementById("wimage-modal-confirm");
+                        confirm.addEventListener("click",function(e){            
+                            var data = e.target;
+                            if(data.id === "wimage-delete-agree"){
+                                deleteSelected();
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                btnRename.addEventListener("click",function(e){
+                    var selected = document.getElementsByClassName("file-selected");
+                    if(selected.length === 1){
+                        var sameName = document.getElementById("wimage-rename-samename");
+                        sameName.style.visibility = "hidden";
+                        var target = selected[0];
+                        var name = target.lastChild.firstChild.nodeValue;
+                        var inputName = document.getElementById("nameValue");
+                        inputName.value = name;
+                        var confirm = document.getElementById("wimage-rename-agree");
+                        confirm.addEventListener("click",function(e){ 
+                            var tempSelected = document.getElementsByClassName("file-selected"); 
+                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
+                            var newName = inputName.value;
+                            if(isMatch(newName,"ellipsis")){
+                                if(newName !== tempName){
+                                    sameName.style.visibility = "visible";
+                                    e.stopPropagation();
+                                }                    
+                            }else{
+                                tempSelected[0].lastChild.firstChild.nodeValue = newName;    
+                            }
+                        });
+                    }else{
+                        disabled(e);
+                    }
+                });
+
+                function createBackImage(src){
+                    var content = "<span>";
+                    content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail" src="';
+                    content += src;
+                    content += '"/></div><p class="ellipsis">&nbsp;</p></div>';
+                    return content;
+                }   
+
+                var TEMP_OUTPUT;
+                var wimagePath = document.getElementById("wimage-back-foldername");
+                var wimageCreateFolder = document.getElementById("wimage-createFolder");
+                var contextDefaultMenu = document.getElementById("contextMenu");
+                var childCreateFolder  = contextDefaultMenu.firstChild;
+
+                // open folder
+                main.addEventListener("dblclick",function(e){
+                    var target = findSelected(e.target);
+                    //if double click on foler 
+                    if(target && target.classList.contains("wimage-item-folder")){  
+                        TEMP_OUTPUT = output.innerHTML;            
+                        output.innerHTML = null;
+                        var backImg = createBackImage("assets/images/enter.png");
+                        output.innerHTML = backImg; 
+                        var nameFolder = target.lastChild.firstChild.nodeValue;
+                        // create only 1 level folder
+                        wimagePath.previousSibling.style.display = "block";
+                        wimagePath.innerHTML = nameFolder;
+                        wimageCreateFolder.classList.add("disabled");
+                        contextDefaultMenu.removeChild(childCreateFolder);
+                    }
+                    var backPath = document.getElementById("wimage-back-path");
+                    if(backPath){
+                        backPath.addEventListener("click",function(e){
+                            disabled(e); 
+                        });
+                        backPath.addEventListener("click",function(e){
+                            output.innerHTML = null;
+                            output.innerHTML = TEMP_OUTPUT;
+                            wimagePath.previousSibling.style.display = "none";
+                            wimagePath.innerHTML = null;
+                            wimageCreateFolder.classList.remove("disabled");
+                            contextDefaultMenu.insertBefore(childCreateFolder,contextDefaultMenu.firstChild);
+                        });
+                    }
+                   
+                });
+
+
+                window.onbeforeunload = function() {
+                    return "You want to leave this site !";
+                }
+    
+            }   
+
+            clickHandler();
 
             /**
              * Button
@@ -1165,7 +1271,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     var end = (numStart > numEnd) ? numStart : numEnd;
                     start = parseInt(start);
                     end = parseInt(end); 
-                    dump(start + " " + end);
                     var select = document.getElementsByClassName("wimage-thumbnail-group");
                     var l = select.length;
                     for(var i = 0 ; i < l ; i++){
@@ -1318,6 +1423,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             });
         }
         switchView();
+
         /*
         * -------------
         * edit file 
@@ -1410,7 +1516,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         }
 
+
         editFile();
+
         /*
         * --------------------
         * exploring the folder 
