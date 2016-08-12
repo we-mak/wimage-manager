@@ -1092,10 +1092,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }            
                 });
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
                 btnDelete.addEventListener("click",function(e){
                     if(isSelected()){
                         var confirm = document.getElementById("wimage-modal-confirm");
@@ -1184,17 +1180,13 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }
                    
                 });
-<<<<<<< Updated upstream
-
 
                 window.onbeforeunload = function() {
                     return "You want to leave this site !";
                 }
-=======
                 // window.onbeforeunload = function() {
                 //     return "You want to leave this site !";
                 // }
->>>>>>> Stashed changes
     
             }   
 
@@ -1524,10 +1516,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 });
 
         }
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
         editFile();
 
