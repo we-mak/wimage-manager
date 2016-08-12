@@ -23,7 +23,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var defaults = {
             url: '',//for backend API connector
             lang: '',
-            maxFileUpload: '15',
+            maxFileUpload: '5',
             maxSizeUpload: '10mb',
             mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
@@ -94,7 +94,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         /*
         * -----------------
-        * Helper functions
+        * Utils functions
         * -----------------
         */  
 
