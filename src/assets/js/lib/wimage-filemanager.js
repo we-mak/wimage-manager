@@ -1199,6 +1199,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             var keyboard = {
                 detectKeyboard: function(event){
                     event = (event) ? event : window.event;
+
                     if(event.ctrlKey){
                         switch(event.keyCode){
                             case 65: return "ctrlA";
@@ -1217,6 +1218,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         if(event.shiftKey){
                             return "shift";
                         } 
+                        if(event.metaKey){
+                            return "meta";
+                        }
                     }
                     return null;
                 }
@@ -1288,7 +1292,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 var target = findSelected(e.target);   
                 var detectKeyboard = keyboard.detectKeyboard(e);
                 if(target){
-                    if(detectKeyboard === "ctrl"){
+                    disabled(e);
+                    if(detectKeyboard === "ctrl" || detectKeyboard === "meta"){
                         if(target.classList.contains("file-selected")){
                             removeSelect(target);
                         }else{
