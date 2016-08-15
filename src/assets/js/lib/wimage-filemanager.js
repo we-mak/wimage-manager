@@ -16,30 +16,80 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 }
 
 (function() {
-    "use strict";
-
+    var dump = function(a){console.log(a)}
     var WimageFilemanager = (function() { 
         /* General variables */
+
         var defaults = {
             url: '',//for backend API connector
-            lang: '',
+            lang: 'vietnamese',
             maxFileUpload: '5',
-            maxSizeUpload: '10mb',
+            maxSizeUpload: '5mb',
             mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
-        },
+        }
 
-        temp = {
+        var language =  {
+            english : {
+                rename : "Rename",
+                move : "Move",
+                delete : "Delete",
+                search : "Search",
+                placeholderSearch : "Type a name... ",
+                upload : "Upload",
+                newfolder : "New album",
+                openFolder : "Explore image",
+                editName : "Edit name",
+                preview : "Preview",
+                error : {
+                    numfile: "The maximum files number are " + defaults.maxFileUpload,
+                    mimeAndSize: "Error files: ",
+                }
+            },
+            vietnamese : {
+                rename : "Sửa tên",
+                move : "Chuyển folder",
+                delete : "Xóa",
+                search : "Tìm kiếm",
+                placeholderSearch : "Nhập tên... ",
+                upload : "Đăng hình",
+                newfolder : "Tạo folder",
+                openFolder : "Mở",
+                editName : "Sửa tên",
+                preview : "Xem",
+                error : {
+                    numfile: "Số files tối đa là " + defaults.maxFileUpload,
+                    mimeAndSize: "Files upload lỗi: ",
+                }
+            },
+            russian : {
+                rename : "переименовать",
+                move : "переехать",
+                delete : "Удалить",
+                search : "поиск",
+                placeholderSearch : "Тип имя папки или изображения... ",
+                upload : "загрузить",
+                newfolder : "новая папка",
+                openFolder : "открыть папку",
+                editName : "редактировать имя",
+                preview : "увидеть"
+            }
+        };
+
+        var defaultsLang = (language[defaults.lang]) ? language[defaults.lang] : language["english"];
+
+        var temp = {
             gridView: '',
             listView: '',
-            rename: 'Rename',
-            move: 'Move',
-            del: 'Delete',
-            search: 'Search',
-            upload: 'Upload',
-            addfolder: 'New album'
+            rename: defaultsLang.rename,
+            move: defaultsLang.move,
+            del: defaultsLang.delete,
+            search: defaultsLang.search,
+            upload: defaultsLang.upload,
+            addfolder: defaultsLang.newfolder,
+            placeholder : defaultsLang.placeholderSearch
         }, 
-        
+
         btnIcon = {
             gridIcon: '<i class="fa fa-th"></i>',
             listIcon: '<i class="fa fa-list"></i>',
@@ -59,46 +109,50 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         };
         /* context menu variables */
         var cMenuTitle = {
-                          general: {
-                          createFolder: "New album",
-                          upload: "Upload"
-                          },
-                          folder: {
-                            explore: "Explore image",
-                            editName: "Edit name",
-                            del: "Delete"
-                          },
-                          image: {
-                          preview: "Preview",
-                          editName: "Edit Name",
-                          changeFolder: "Move",
-                          del: "Delete"
-                          }
-        },
-            cMenuIcons = {
-                          general: {
-                          createFolder: '<i class="fa fa-folder"></i>',
-                          upload: '<i class="fa fa-upload"></i>'
-                          },
-                          folder: {
-                            explore: '<i class="fa fa-folder-open"></i>',
-                            editName: '<i class="fa fa-edit"></i>',
-                            del: '<i class="fa fa-trash"></i>'
-                          },
-                          image: {
-                          preview: '<i class="fa fa-eye"></i>',
-                          editName: '<i class="fa fa-edit"></i>',
-                          changeFolder: '<i class="fa fa-exchange"></i>',
-                          del: '<i class="fa fa-trash"></i>'
-                          }
-        }; 
+                             default: {
+                             createFolder: defaultsLang.newfolder,
+                             upload: defaultsLang.upload
+                             },
+                             folder: {
+                               explore: defaultsLang.openFolder,
+                               editName: defaultsLang.editName,
+                               del: defaultsLang.delete
+                             },
+                             image: {
+                             preview: defaultsLang.preview,
+                             editName: defaultsLang.editName,
+                             changeFolder: defaultsLang.move,
+                             del: defaultsLang.delete
+                           }
+          },
+              cMenuIcons = {
+                             default: {
+                             createFolder: '<i class="fa fa-folder"></i>',
+                             upload: '<i class="fa fa-upload"></i>'
+                             },
+                             folder: {
+                               explore: '<i class="fa fa-folder-open"></i>',
+                               editName: '<i class="fa fa-edit"></i>',
+                               del: '<i class="fa fa-trash"></i>'
+                             },
+                             image: {
+                             preview: '<i class="fa fa-eye"></i>',
+                             editName: '<i class="fa fa-edit"></i>',
+                             changeFolder: '<i class="fa fa-exchange"></i>',
+                             del: '<i class="fa fa-trash"></i>'
+                           }
+          };
 
+        
         /*
         * -----------------
         * Utils functions
         * -----------------
         */  
+        
+        
 
+        
         //Filter 
         // Looking for child element in depth
         function findChild(parent, child) {
@@ -359,6 +413,24 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             }
         }
 
+
+        function myFadeOut(obj,time,flag){
+            var style = getComputedStyle(obj);
+            var tempOpacity = style.opacity;
+            tempOpacity -= 0.05;
+            obj.style.opacity = tempOpacity;
+            var id = setTimeout(function(e){
+                if(tempOpacity <= 0){
+                    if(flag)
+                        obj.innerHTML = "";
+                    obj.style.display = "none";
+                    clearTimeout(id);
+                }else{
+                    myFadeOut(obj,time,flag);
+                }
+            },time);
+        }
+
         /*
         * --------------------
         * Initialize Main DOM
@@ -366,7 +438,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         */
         function AppLayout() {
 
-            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
+            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span><div id="wimage-error-upload"></div></div>';
 
             var html_init = '<div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
@@ -380,7 +452,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                             + '<button id="wimage-btn-delete" type="button" class="btn btn-default btn-sm disabled">' + btnIcon.deleteIcon + temp.del + '</button></div></div>';  
                 //search 
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"> <div class="input-group">'
-                            + '<input type="text" class="form-control input-sm" placeholder="Type a name..."><span class="input-group-btn"><button class="btn btn-primary btn-sm" type="button">' 
+                            + '<input type="text" class="form-control input-sm" placeholder="' + temp.placeholder + '"><span class="input-group-btn"><button class="btn btn-primary btn-sm" type="button">' 
                             + temp.search + '</button></span></div></div>';
                 // upload, create folder
                 html_init = html_init + '<div class="col-md-3 col-sm-12 wimage-toolbar-block"><div class="wimage-create-btn-group"><div class="wimage-input-style-group">'
@@ -495,16 +567,20 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 return str;
             }
 
-          function handleFileSelect(evt) {
+        function handleFileSelect(evt) {
               "use strict";
-              evt.stopPropagation();
-              evt.preventDefault();
+              disabled(evt);
+              var errorDiv = document.getElementById("wimage-error-upload");
               var files = evt.target.files; // FileList object
               // Loop through the FileList and render image files as thumbnails.
               var numberFile = files.length;
+              var flag = true;
+              if(numberFile > defaults.maxFileUpload){
+                    flag = false;
+              }
               numberFile = (numberFile <= defaults.maxFileUpload) ? numberFile : defaults.maxFileUpload;
 
-               var grid = document.getElementById("wimage-btn-grid");
+                 var grid = document.getElementById("wimage-btn-grid");
                 var listView = {img: "",name: ""};
                 var display = "";
                 if(!grid.classList.contains("active")){
@@ -512,50 +588,78 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     display = ' style="display: block;"';
                 }
 
-              for (var i = 0; i < numberFile ; i++) {
-                // Only process image files.
-                var fileSize = getSize(defaults.maxSizeUpload);
-                if (!validateSize(files[i],fileSize) || !validateType(files[i],defaults.mimeType)){
-                  continue;
-                }
-                // Reset progress indicator on new file selection.
-                progress.style.width = '0%';
-                progress.textContent = '0%';
-                reader = new FileReader();      
-                reader.onerror = errorHandler;
-                reader.onprogress = updateProgress;
-                reader.onabort = function(e) {
-                  alert('File read cancelled');
-                };
-                reader.addEventListener('loadstart', function(e) {
-                  document.getElementById('progress_bar').className = 'loading';
-                });
+                var errorFileUpload = [],j = 0;
+                dump(flag);
+                if(flag){
+                  for (var i = 0; i < numberFile ; i++) {
+                    // Only process image files.
+                    var fileSize = getSize(defaults.maxSizeUpload);
+                    if (!validateSize(files[i],fileSize) || !validateType(files[i],defaults.mimeType)){
+                        errorFileUpload[j++] = files[i];
+                      continue;
+                    }
+                    // Reset progress indicator on new file selection.
+                    progress.style.width = '0%';
+                    progress.textContent = '0%';
+                    reader = new FileReader();      
+                    reader.onerror = errorHandler;
+                    reader.onprogress = updateProgress;
+                    reader.onabort = function(e) {
+                      alert('File read cancelled');
+                    };
+                    reader.addEventListener('loadstart', function(e) {
+                      document.getElementById('progress_bar').className = 'loading';
+                    });
 
-                // Closure to capture the file information.
-                reader.onload = (function(theFile) {
-                  return function(e) {
-                    // Ensure that the progress bar displays 100% at the end.
-                    progress.style.width = '100%';
-                    progress.textContent = '100%';
-                    setTimeout("document.getElementById('progress_bar').className='';", 800);
-                    // Rendering thumbnail.
-                    var span = document.createElement('span');
-                    var nameFile = setName(theFile.name,"ellipsis");
-                    span.innerHTML = [
-                                      '<div class="wimage-thumbnail-group wimage-item-image" data-value="'+ (DATA_VALUE++) +'" ' + display + '><div class="wimage-thumbnail-wrapper'+ listView.img +'"><img class="wimageThumbnail" src="', 
-                                      e.target.result, '"/></div>' 
-                                      + '<p class="ellipsis'+ listView.name +'" id="wimage-filename" title="'+ nameFile +'">' + nameFile + '</p>' // Included file name
-                                      + '</div>'].join('');
-                    document.getElementById('wimage-list').insertBefore(span, null);               
-                  };
-                })(files[i]);
-                // Read in the image file as a data URL.
-                reader.readAsDataURL(files[i]);
-              }
-              evt.target.value = null;
-          }
-          var file = document.getElementById('file');
-          return file.addEventListener('change', handleFileSelect, false);
+                    // Closure to capture the file information.
+                    reader.onload = (function(theFile) {
+                      return function(e) {
+                        // Ensure that the progress bar displays 100% at the end.
+                        progress.style.width = '100%';
+                        progress.textContent = '100%';
+                        setTimeout("document.getElementById('progress_bar').className='';", 800);
+                        // Rendering thumbnail.
+                        var span = document.createElement('span');
+                        var nameFile = setName(theFile.name,"ellipsis");
+                        span.innerHTML = [
+                                          '<div class="wimage-thumbnail-group wimage-item-image" data-value="'+ (DATA_VALUE++) +'" ' + display + '><div class="wimage-thumbnail-wrapper'+ listView.img +'"><img class="wimageThumbnail" src="', 
+                                          e.target.result, '"/></div>' 
+                                          + '<p class="ellipsis'+ listView.name +'" id="wimage-filename" title="'+ nameFile +'">' + nameFile + '</p>' // Included file name
+                                          + '</div>'].join('');
+                        document.getElementById('wimage-list').insertBefore(span, null);               
+                      };
+                    })(files[i]);
+                    // Read in the image file as a data URL.
+                    reader.readAsDataURL(files[i]);
+                  }
+                  var lenghtError = errorFileUpload.length;
+                  if(lenghtError > 0){
+                        var temp = '<span class="non">' +  defaultsLang.error.mimeAndSize + ' </span>';
+                        for(var i = 0 ; i < lenghtError ; i++){
+                            var co = '<span class="non">, </span>';
+                            if(i === lenghtError - 1)
+                                co = " ";
+                            temp += '"'+errorFileUpload[i].name+ '"' + co;
+                        }
+                        errorDiv.innerHTML = temp;
+                        errorDiv.style.display = "block";
+                        errorDiv.style.opacity = "1";
+                        setTimeout(function(){
+                            myFadeOut(errorDiv,20,true);
+                        },2000);
+                  }   
+                 }else{
+                    errorDiv.innerHTML = defaultsLang.error.numfile;
+                    errorDiv.style.display = "block";
+                    errorDiv.style.opacity = "1";
+                    setTimeout(function(){
+                        myFadeOut(errorDiv,20,true);   
+                    },2000);
+                }
+                evt.target.value = null;
+            }
+            var file = document.getElementById('file');
+            return file.addEventListener('change', handleFileSelect, false);
         }
         upLoad();
         /*
@@ -573,8 +677,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           //create element when click the button.
           create.addEventListener('click', function(e) {
             "use strict";
-            e.stopPropagation();
-            e.preventDefault();
+            disabled(e);
             if(!create.classList.contains("disabled")){
                 function fileName() {
                     var folderName = "Album";
@@ -619,40 +722,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var btnUpload = document.getElementById("file");
 
         function contextMenu() {
-          var cMenuTitle = {
-                             default: {
-                             createFolder: "New album",
-                             upload: "Upload"
-                             },
-                             folder: {
-                               explore: "Explore image",
-                               editName: "Edit name",
-                               del: "Delete"
-                             },
-                             image: {
-                             preview: "Preview",
-                             editName: "Edit Name",
-                             changeFolder: "Move",
-                             del: "Delete"
-                           }
-          },
-              cMenuIcons = {
-                             default: {
-                             createFolder: '<i class="fa fa-folder"></i>',
-                             upload: '<i class="fa fa-upload"></i>'
-                             },
-                             folder: {
-                               explore: '<i class="fa fa-folder-open"></i>',
-                               editName: '<i class="fa fa-edit"></i>',
-                               del: '<i class="fa fa-trash"></i>'
-                             },
-                             image: {
-                             preview: '<i class="fa fa-eye"></i>',
-                             editName: '<i class="fa fa-edit"></i>',
-                             changeFolder: '<i class="fa fa-exchange"></i>',
-                             del: '<i class="fa fa-trash"></i>'
-                           }
-          };
+          
 
         var menuStart = '<menu class="context-menu dropdown-menu" ';
         var menuEnd = '</menu>';
@@ -758,8 +828,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                             var childImg = target.node.firstChild.firstChild;
                             childImg.classList.add("wimage-slide-active");
                         }else{
-                            e.stopPropagation();
-                            e.preventDefault();
+                            disabled(e);
                         }
                         
                     }break;
@@ -818,8 +887,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         function turnOn(e,menu){
             e = (e) ? e : window.event;
-            e.preventDefault();
-            e.stopPropagation();
+            disabled(e);
             positionMenu(e,menu);
             toggleMenuOn(menu);
         }
@@ -1587,6 +1655,5 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         folderXplore(); 
 
     })();
-    //window.WimageFilemanager;
 
 })();

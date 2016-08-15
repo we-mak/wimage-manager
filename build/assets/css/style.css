@@ -2437,6 +2437,16 @@ rect {
   font-style: italic;
   display: none;
 }
+.wimage-path div#wimage-error-upload {
+  margin-left: 100px;
+  color: #DC143C;
+  background: #f2dede;
+  padding: 5px;
+  display: none;
+}
+.wimage-path #wimage-error-upload span.non {
+  color: black;
+}
 header {
   width: 100%;
   height: 50px;
