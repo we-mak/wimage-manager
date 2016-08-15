@@ -23,7 +23,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var defaults = {
             url: '',//for backend API connector
             lang: 'vietnamese',
-            maxFileUpload: '20',
+            maxFileUpload: '5',
             maxSizeUpload: '5mb',
             mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
@@ -42,8 +42,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 editName : "Edit name",
                 preview : "Preview",
                 error : {
-                    numfile: "The maximum files number are " + defaults.maxFileUpload,
-                    mimeAndSize: "Error files: ",
+                    numfile: "Maximum files upload must least than" + ' <span class="non">' + defaults.maxFileUpload + '</span>',
+                    mime: "mime type erorr " + ' (<span class="non">' + defaults.mimeType.toString() + '</span>)',
+                    size: 'size file must smaller than ' +  ' <span class="non">' + defaults.maxSizeUpload  + '</span>',
                 }
             },
             vietnamese : {
@@ -58,8 +59,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 editName : "Sửa tên",
                 preview : "Xem",
                 error : {
-                    numfile: "Số files tối đa là " + defaults.maxFileUpload,
-                    mimeAndSize: "Files upload lỗi: ",
+                    numfile: "Số files tối đa là " + ' <span class="non">' + defaults.maxFileUpload + '</span>',
+                    mime: "mime type không phù hợp" + ' (<span class="non">' + defaults.mimeType.toString() + '</span>)',
+                    size: "kích thước file phải bé hơn "+ ' <span class="non">' + defaults.maxSizeUpload  + '</span>',
                 }
             },
             russian : {
@@ -440,7 +442,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
             var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
 
-            var html_init = '<div id="wimage-error-upload" class="alert alert-danger"></div><div class="wimage-group">';
+            var html_init = '<div id="wimage-error-upload" class="alert alert-danger"></div>';
+
+                html_init += '<div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
 
                 //switch view, edit group
@@ -580,7 +584,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               }
               numberFile = (numberFile <= defaults.maxFileUpload) ? numberFile : defaults.maxFileUpload;
 
-                 var grid = document.getElementById("wimage-btn-grid");
+                var grid = document.getElementById("wimage-btn-grid");
                 var listView = {img: "",name: ""};
                 var display = "";
                 if(!grid.classList.contains("active")){
@@ -593,9 +597,20 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                   for (var i = 0; i < numberFile ; i++) {
                     // Only process image files.
                     var fileSize = getSize(defaults.maxSizeUpload);
-                    if (!validateSize(files[i],fileSize) || !validateType(files[i],defaults.mimeType)){
-                        errorFileUpload[j++] = files[i];
-                      continue;
+                    var f1 = validateSize(files[i],fileSize);
+                    var f2 = validateType(files[i],defaults.mimeType);
+                    if (!f1 || !f2){
+                        var tempFile = {};
+                        tempFile.file = files[i];
+                        if(!f1 && !f2){
+                            tempFile.error = 3;
+                        }else if(!f1){
+                            tempFile.error = 1;
+                        }else{
+                            tempFile.error = 2;
+                        }
+                        errorFileUpload.push(tempFile);
+                        continue;
                     }
                     // Reset progress indicator on new file selection.
                     progress.style.width = '0%';
@@ -633,27 +648,40 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                   }
                   var lenghtError = errorFileUpload.length;
                   if(lenghtError > 0){
-                        var temp = '<span class="non">' +  defaultsLang.error.mimeAndSize + ' </span>';
+                        var lengthError = errorFileUpload.length;
+                        var temp = "<ul>";
                         for(var i = 0 ; i < lenghtError ; i++){
-                            var co = '<span class="non">, </span>';
-                            if(i === lenghtError - 1)
-                                co = " ";
-                            temp += '"'+errorFileUpload[i].name+ '"' + co;
+                            var typeError = errorFileUpload[i].error;
+                            temp += '<li><span class="non">'+ errorFileUpload[i].file.name + '</span>';
+                            switch(typeError){
+                                case 1:{
+                                    temp += " " + defaultsLang.error.size;
+                                }break;
+                                 case 2:{
+                                    temp += " " + defaultsLang.error.mime;
+                                }break;
+                                 case 3:{
+                                    temp += " " + defaultsLang.error.size +", " + defaultsLang.error.mime;
+                                }break;
+                            }
+                            temp += "</li>";
                         }
+
+                        temp += "</ul>";
                         errorDiv.innerHTML = temp;
                         errorDiv.style.display = "block";
                         errorDiv.style.opacity = "1";
                         setTimeout(function(){
                             myFadeOut(errorDiv,20,true);
-                        },3000);
+                        },4000);
                   }   
                  }else{
-                    errorDiv.innerHTML = defaultsLang.error.numfile;
+                    errorDiv.innerHTML = '<ul><li>'+ defaultsLang.error.numfile; +'</li></ul>';
                     errorDiv.style.display = "block";
                     errorDiv.style.opacity = "1";
                     setTimeout(function(){
                         myFadeOut(errorDiv,20,true);   
-                    },3000);
+                    },4000);
                 }
                 evt.target.value = null;
             }
@@ -1270,6 +1298,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     event = (event) ? event : window.event;
 
                     if(event.ctrlKey){
+
                         switch(event.keyCode){
                             case 65: return "ctrlA";
                             case 67: return "ctrlC";
@@ -1277,13 +1306,14 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                             case 88: return "ctrlX"; 
                             case 90: return "ctrlZ";  
                         }
+
                         return "ctrl";
                     }else{
                         switch(event.keyCode){
                             case 46: return "delete";
                             case 8: return "backspace";
                             case 13: return "enter";
-                            case 91: return "cmd"; 
+                            case 91: return "ctrl"; 
                         }
                         if(event.shiftKey){
                             return "shift";
