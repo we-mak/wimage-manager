@@ -23,7 +23,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var defaults = {
             url: '',//for backend API connector
             lang: '',
-            maxFileUpload: '15',
+            maxFileUpload: '5',
             maxSizeUpload: '10mb',
             mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
@@ -39,6 +39,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             upload: 'Upload',
             addfolder: 'New album'
         }, 
+        
         btnIcon = {
             gridIcon: '<i class="fa fa-th"></i>',
             listIcon: '<i class="fa fa-list"></i>',
@@ -94,7 +95,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         /*
         * -----------------
-        * Helper functions
+        * Utils functions
         * -----------------
         */  
 
@@ -1092,7 +1093,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }            
                 });
 
-
                 btnDelete.addEventListener("click",function(e){
                     if(isSelected()){
                         var confirm = document.getElementById("wimage-modal-confirm");
@@ -1182,10 +1182,12 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                    
                 });
 
-
                 window.onbeforeunload = function() {
                     return "You want to leave this site !";
                 }
+                // window.onbeforeunload = function() {
+                //     return "You want to leave this site !";
+                // }
     
             }   
 
@@ -1520,7 +1522,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 });
 
         }
-
 
         editFile();
 
