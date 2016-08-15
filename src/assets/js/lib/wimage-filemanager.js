@@ -23,7 +23,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         var defaults = {
             url: '',//for backend API connector
             lang: 'vietnamese',
-            maxFileUpload: '5',
+            maxFileUpload: '20',
             maxSizeUpload: '5mb',
             mimeType: ["image/jpeg","image/png"],
             datetimeFormat: 'DD/MM/YYYY'
@@ -438,9 +438,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         */
         function AppLayout() {
 
-            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span><div id="wimage-error-upload"></div></div>';
+            var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
 
-            var html_init = '<div class="wimage-group">';
+            var html_init = '<div id="wimage-error-upload" class="alert alert-danger"></div><div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
 
                 //switch view, edit group
@@ -589,7 +589,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
 
                 var errorFileUpload = [],j = 0;
-                dump(flag);
                 if(flag){
                   for (var i = 0; i < numberFile ; i++) {
                     // Only process image files.
@@ -646,7 +645,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         errorDiv.style.opacity = "1";
                         setTimeout(function(){
                             myFadeOut(errorDiv,20,true);
-                        },2000);
+                        },3000);
                   }   
                  }else{
                     errorDiv.innerHTML = defaultsLang.error.numfile;
@@ -654,7 +653,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     errorDiv.style.opacity = "1";
                     setTimeout(function(){
                         myFadeOut(errorDiv,20,true);   
-                    },2000);
+                    },3000);
                 }
                 evt.target.value = null;
             }
@@ -1283,7 +1282,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         switch(event.keyCode){
                             case 46: return "delete";
                             case 8: return "backspace";
-                            case 13: return "enter"; 
+                            case 13: return "enter";
+                            case 91: return "cmd"; 
                         }
                         if(event.shiftKey){
                             return "shift";
@@ -1357,31 +1357,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
             }
 
-            function eventForCtrlClick(e){
-                e = (e) ? e : window.event;
-                var target = findSelected(e.target);   
-                var detectKeyboard = keyboard.detectKeyboard(e);
-                if(target){
-                    disabled(e);
-                    if(detectKeyboard === "ctrl" || detectKeyboard === "meta"){
-                        if(target.classList.contains("file-selected")){
-                            removeSelect(target);
-                        }else{
-                            addSelect(target);
-                        }
-                    }else{
-                        if(detectKeyboard === "shift"){
-                            addSelect(target);
-                            target.setAttribute("pointStart","1");
-                            var selected = document.getElementsByClassName("file-selected");
-                            getStartAndEnd(target);
-                        }else{
-                            addSelect(target);
-                        }
-                    }
-                    activeButton([btnDelete,btnMove,btnRename]);
-                }
-            }
+            
 
          /**
          * END Button
@@ -1424,12 +1400,37 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             }
 
            
+            function eventForCtrlClick(e){
+                e = (e) ? e : window.event;
+                var target = findSelected(e.target);   
+                var detectKeyboard = keyboard.detectKeyboard(e);
+                if(target){
+                    disabled(e);
+                    if(detectKeyboard === "ctrl"){
+                        if(target.classList.contains("file-selected")){
+                            removeSelect(target);
+                        }else{
+                            addSelect(target);
+                        }
+                    }else{
+                        if(detectKeyboard === "shift"){
+                            addSelect(target);
+                            target.setAttribute("pointStart","1");
+                            var selected = document.getElementsByClassName("file-selected");
+                            getStartAndEnd(target);
+                        }else{
+                            addSelect(target);
+                            target.setAttribute("pointStart","1");
+                        }
+                    }
+                    activeButton([btnDelete,btnMove,btnRename]);
+                }
+            }
+
              // click envent
             function clickHandler(){
     
-                main.addEventListener('click',eventForCtrlClick);
-
-            
+                main.addEventListener('click',eventForCtrlClick);     
 
                 // window.onbeforeunload = function() {
                 //     return "You want to leave this site !";

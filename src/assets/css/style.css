@@ -2437,14 +2437,17 @@ rect {
   font-style: italic;
   display: none;
 }
-.wimage-path div#wimage-error-upload {
+#wimage-error-upload {
+  display: none;
+  position: fixed;
+  top: 30px;
+  right: 100px;
   margin-left: 100px;
   color: #DC143C;
-  background: #f2dede;
-  padding: 5px;
-  display: none;
+  padding: 20px;
+  text-align: center;
 }
-.wimage-path #wimage-error-upload span.non {
+#wimage-error-upload span.non {
   color: black;
 }
 header {
