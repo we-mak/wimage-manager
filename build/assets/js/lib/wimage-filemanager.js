@@ -64,6 +64,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }
                 },
                 moveSuccess: "Moving the file successed",
+                folder: "Folders are not exists",
             },
             vietnamese : {
                 rename : "Sửa tên",
@@ -98,6 +99,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     }
                 },
                 moveSuccess: "Di chuyển file thành công",
+                folder: "Thư mục không tồn tại"
             },
         };
 
@@ -776,7 +778,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         errorDiv.style.opacity = "1";
                         setTimeout(function(){
                             myFadeOut(errorDiv,20,true);
-                        },4000);
+                        },3000);
                   }   
                  }else{
                     errorDiv.innerHTML = '<ul><li>'+ defaultsLang.error.numfile; +'</li></ul>';
@@ -784,7 +786,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     errorDiv.style.opacity = "1";
                     setTimeout(function(){
                         myFadeOut(errorDiv,20,true);   
-                    },4000);
+                    },3000);
                 }
                 evt.target.value = null;
             }
@@ -803,20 +805,23 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
               create = document.getElementById(id),
               fileCount = 0;
 
-            
           //create element when click the button.
           create.addEventListener('click', function(e) {
             "use strict";
             disabled(e);
             if(!create.classList.contains("disabled")){
                 function fileName() {
-                    var folderName = "Album";
+                    
                     var fileUp = fileCount++;
-                    folderName = (fileUp === 0) ? folderName : folderName + " (" + fileUp.toString() + ")";
-                    if(isMatch(folderName,"ellipsis"))
-                        return fileName();
-                    else
-                        return folderName;
+                    var nums = fileCount;
+
+                    for(var i = 0 ; i < nums ; i++){
+                        var folderName = "Album";
+                        folderName = (i === 0) ? folderName : folderName + " (" + i.toString() + ")";
+                        if(!isMatch(folderName,"ellipsis")){
+                            return folderName;
+                        }
+                    }
                 } 
 
                 var grid = document.getElementById("wimage-btn-grid");
@@ -1125,7 +1130,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                                 btnRename.click();
                             }break;
                             case "changeFolder":{
-                              
+                                btnMove.click();
                             }break;
                             case "deleteImage":{
                                 btnDelete.click();
@@ -1721,21 +1726,31 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             });
 
             btnMove.addEventListener("click",function(e){
+                var success = document.getElementById("wimage-notice");
                 var selected = document.getElementsByClassName("file-selected");
-                if(selected.length === 1 && selected[0].classList.contains("wimage-item-image")){
+                var folders = document.getElementsByClassName("wimage-item-folder");
+                var lFolders = folders.length;
+                if(selected.length === 1 && selected[0].classList.contains("wimage-item-image") && lFolders > 0){
                     updateContentPopUpRename("wimage-item-folder");
                     var btnMoveAgree = document.getElementById("wimage-move-agree");
-                    btnMoveAgree.addEventListener("click",function(e){
-                        var success = document.getElementById("wimage-notice");
+                    btnMoveAgree.addEventListener("click",function(e){    
                         success.innerHTML = defaultsLang.moveSuccess;
                         success.style.display = "block";
                         success.style.opacity = "1";    
                         setTimeout(function(){
                             myFadeOut(success,20,true);
-                        },4000);
+                        },3000);
                     });
                 }else{
                     disabled(e);
+                    if(lFolders === 0){
+                        success.innerHTML = defaultsLang.folder;
+                        success.style.display = "block";
+                        success.style.opacity = "1";    
+                        setTimeout(function(){
+                            myFadeOut(success,20,true);
+                        },3000);
+                    }
                 }
             });
         }
