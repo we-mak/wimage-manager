@@ -26,7 +26,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             maxFileUpload: '5',
             maxSizeUpload: '5mb',
             mimeType: ["image/jpeg","image/png"],
-            datetimeFormat: 'DD/MM/YYYY'
+            datetimeFormat: 'DD/MM/YYYY',
+            idPlugin: 'filemanager'
         }
 
         var language =  {
@@ -45,7 +46,24 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     numfile: "Maximum files upload must least than" + ' <span class="non">' + defaults.maxFileUpload + '</span>',
                     mime: "mime type erorr " + ' (<span class="non">' + defaults.mimeType.toString() + '</span>)',
                     size: 'size file must smaller than ' +  ' <span class="non">' + defaults.maxSizeUpload  + '</span>',
-                }
+                },
+                popUp:{
+                    rename: {
+                        cancel: "Cancel",
+                        agree: "OK",
+                    },
+                    delete:{
+                        cancel: "Cancel",
+                        agree: "OK",
+                        title: "Are you sure ??? ",
+                    },
+                    move: {
+                        cancel: "Cancel",
+                        agree: "OK",
+                        title: "Move to anoter folder",
+                    }
+                },
+                moveSuccess: "Moving the file successed",
             },
             vietnamese : {
                 rename : "Sửa tên",
@@ -62,20 +80,25 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                     numfile: "Số files tối đa là " + ' <span class="non">' + defaults.maxFileUpload + '</span>',
                     mime: "mime type không phù hợp" + ' (<span class="non">' + defaults.mimeType.toString() + '</span>)',
                     size: "kích thước file phải bé hơn "+ ' <span class="non">' + defaults.maxSizeUpload  + '</span>',
-                }
+                },
+                popUp:{
+                    rename: {
+                        cancel: "Hủy",
+                        agree: "Xác nhận",
+                    },
+                    delete:{
+                        cancel: "Hủy",
+                        agree: "Xác nhận",
+                        title: "Bạn có chắc chắn muốn xóa ??? ",
+                    },
+                    move: {
+                        cancel: "Hủy",
+                        agree: "Xác nhận",
+                        title: "Di chuyển đển thư mục khác",
+                    }
+                },
+                moveSuccess: "Di chuyển file thành công",
             },
-            russian : {
-                rename : "переименовать",
-                move : "переехать",
-                delete : "Удалить",
-                search : "поиск",
-                placeholderSearch : "Тип имя папки или изображения... ",
-                upload : "загрузить",
-                newfolder : "новая папка",
-                openFolder : "открыть папку",
-                editName : "редактировать имя",
-                preview : "увидеть"
-            }
         };
 
         var defaultsLang = (language[defaults.lang]) ? language[defaults.lang] : language["english"];
@@ -246,7 +269,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
             var bodyFooter = document.createElement("div");
             bodyFooter.classList.add("modal-footer");
-            bodyFooter.id = "wimage-modal-confirm";
+            bodyFooter.id = "wimage-modal-delete-confirm";
 
             for(var i in buttons){
                 var temp = document.createElement("button");
@@ -289,7 +312,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             bodyContent.innerHTML = '<input type="text" name="inputFileName" id="nameValue" value="" class="form-control" autofocus/>';
             var bodyFooter = document.createElement("div");
             bodyFooter.classList.add("modal-footer");
-            bodyFooter.id = "wimage-modal-confirm";
+            bodyFooter.id = "wimage-modal-rename-confirm";
             bodyFooter.innerHTML = '<div class="col-md-4" id="wimage-rename-samename" style="visibility:'+ 'hidden' +'">The same name</div>';
             var tempDiv = document.createElement("div");
             tempDiv.classList.add('col-md-8');
@@ -313,6 +336,81 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             parent.appendChild(modalContent);
             hugeModal.appendChild(parent);
             return hugeModal;
+        }
+
+        function createPopupMove(id,buttons,contentHeader,className){
+            var hugeModal = document.createElement("div");
+            hugeModal.classList.add("modal");
+            hugeModal.classList.add("fade");
+            hugeModal.id = id;
+
+            hugeModal.setAttribute("role", "dialog");
+
+            var parent = document.createElement("div");
+            parent.classList.add("modal-dialog");
+
+            var modalContent = document.createElement("div");
+            modalContent.classList.add("modal-content");
+
+            var bodyHeader = document.createElement("div");
+            bodyHeader.classList.add("modal-header");
+
+            bodyHeader.innerHTML = '<h4> <i class="fa fa-folder-o" aria-hidden="true"></i> ' + contentHeader + '</h4>';
+
+            var bodyContent = document.createElement("div");
+            bodyContent.id = "wimage-modal-move-content";
+            bodyContent.classList.add("modal-body");
+
+            var bodyFooter = document.createElement("div");
+            bodyFooter.classList.add("modal-footer");
+            bodyFooter.id = "wimage-modal-confirm";
+            bodyFooter.innerHTML = '';
+            var tempDiv = document.createElement("div");
+            for(var i in buttons){
+                var temp = document.createElement("button");
+                temp.setAttribute("type","button");
+                temp.classList.add("btn");
+                temp.classList.add("btn-" + buttons[i].btn);
+                if(buttons[i].id){
+                    temp.id = buttons[i].id;
+                }
+                temp.setAttribute("data-dismiss","modal");
+            
+                var text = document.createTextNode(buttons[i].content);
+                temp.appendChild(text);
+                tempDiv.appendChild(temp);
+            }
+            bodyFooter.appendChild(tempDiv);
+            modalContent.appendChild(bodyHeader);
+            modalContent.appendChild(bodyContent);
+            modalContent.appendChild(bodyFooter);
+            parent.appendChild(modalContent);
+            hugeModal.appendChild(parent);
+            return hugeModal;
+        }
+
+        function updateContentPopUpRename(className){
+            var folders = document.getElementsByClassName(className);
+            var length = folders.length;
+            var bodyContent = document.getElementById("wimage-modal-move-content");
+            bodyContent.innerHTML = '';
+            for(var i = 0 ; i < length ; i++){
+                var tempNode = folders[i].cloneNode(true);
+                tempNode.style.display = "block";
+                var classList = tempNode.classList;
+                classList.remove("wimage-item-folder");
+                classList.add("wimage-popup-folder");
+                if(classList.contains("file-selected")){
+                    classList.remove("file-selected");
+                    classList.add("selected-folder");
+                }
+
+                tempNode.firstChild.classList.add("wimage-thumbnail-wrapper-list");
+                tempNode.lastChild.classList.add("list-name");
+                var span = document.createElement("span");
+                span.appendChild(tempNode);
+                bodyContent.appendChild(span);
+            }
         }
 
         function isMatch(str,className){
@@ -356,7 +454,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         // active các nút delete move rename nếu có ít nhất 1 file đc chọn
         function activeButton(btn){
-            var l = isSelected();
+            var selected = document.getElementsByClassName("file-selected");
+            var l = selected.length;
             if(l){
                 for(var i in btn){
                     btn[i].classList.remove("disabled");
@@ -368,6 +467,10 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             }
             if(l === 1){
                 document.getElementById("wimage-btn-rename").classList.remove("disabled");
+                selected = selected[0];
+                if(selected.classList.contains("wimage-item-folder")){
+                    document.getElementById("wimage-btn-move").classList.add("disabled");
+                }
             }else{
                  document.getElementById("wimage-btn-rename").classList.add("disabled");
             }         
@@ -443,7 +546,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             var pathHome = '<div class="wimage-path"><i class="fa fa-home" aria-hidden="true"></i><span class="wimage-back-slash">&nbsp;/&nbsp;</span><span id="wimage-back-foldername"></span></div>';
 
             var html_init = '<div id="wimage-error-upload" class="alert alert-danger"></div>';
-
+                html_init += '<div id="wimage-notice" class="alert alert-success"></div>';
                 html_init += '<div class="wimage-group">';
                 html_init = html_init + '<div class="navbar"><div class="wimage-header">';
 
@@ -471,7 +574,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
                 html_init = html_init + '</div>';
 
-            var layOut = document.getElementById('filemanager');
+            var layOut = document.getElementById(defaults.idPlugin);
             return layOut.innerHTML = html_init;   
         }
         AppLayout();
@@ -1190,7 +1293,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
                 btnDelete.addEventListener("click",function(e){
                     if(isSelected()){
-                        var confirm = document.getElementById("wimage-modal-confirm");
+                        var confirm = document.getElementById("wimage-modal-delete-confirm");
                         confirm.addEventListener("click",function(e){            
                             var data = e.target;
                             if(data.id === "wimage-delete-agree"){
@@ -1289,7 +1392,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             clickHandler();
 
             /**
-             * Button
+             * Keyboard event 
              * -------------------------------------
              */
 
@@ -1389,16 +1492,11 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
             
 
-         /**
-         * END Button
-         * -------------------------------------
-         */
-
-            
-
             /**
-             * ---------------------------------
-             */
+            * END keyboard
+            * -------------------------------------
+            */
+
     
             // for draw and choose file
             main.addEventListener("mousedown",function(event){
@@ -1476,11 +1574,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         selectFile();
 
-        /*
-        * -------------
-        * Keyboard event 
-        * -------------
-        */
+        
   
 
 
@@ -1539,31 +1633,37 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
             /**
              * ------------------------------------
-             */
-            
+             */        
             // add popup menu
-            var modal = createPopup("myModal",["Are you sure ??? "],[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-delete-agree",btn: "primary",content: "OK"}
+            
+            var deletePopup = createPopup("deletePopup",[defaultsLang.popUp.delete.title],[
+                {id:"wimage-cancel",btn: "default",content: defaultsLang.popUp.delete.cancel},
+                {id:"wimage-delete-agree",btn: "primary",content: defaultsLang.popUp.delete.agree}
             ]);
 
             var renamePopup = createPopupRename("renamePopup",[
-                {id:"wimage-cancel",btn: "default",content: "Cancel"},
-                {id:"wimage-rename-agree",btn: "primary",content: "OK"}
+                {id:"wimage-cancel",btn: "default",content: defaultsLang.popUp.rename.cancel},
+                {id:"wimage-rename-agree",btn: "primary",content: defaultsLang.popUp.rename.agree}
             ]);
 
-            nav.appendChild(modal);
-            nav.appendChild(renamePopup);
-    
+            var movePopup = createPopupMove("movePopup",[
+                {id:"wimage-cancel",btn: "default",content: defaultsLang.popUp.move.cancel},
+                {id:"wimage-move-agree",btn: "primary",content: defaultsLang.popUp.move.agree}
+            ],defaultsLang.popUp.move.title);
 
+            nav.appendChild(deletePopup);
+            nav.appendChild(renamePopup);
+            nav.appendChild(movePopup);
+            
             //set popup
             function setPopup(node,toggle,target){
                 node.setAttribute("data-toggle", toggle);
                 node.setAttribute("data-target", target);
             }
 
-            setPopup(btnDelete,"modal","#myModal");
+            setPopup(btnDelete,"modal","#deletePopup");
             setPopup(btnRename,"modal","#renamePopup");
+            setPopup(btnMove,"modal","#movePopup");
 
             function deleteSelected(){
                 var selected = document.getElementsByClassName("file-selected");
@@ -1576,50 +1676,68 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 activeButton([btnDelete,btnMove,btnRename]);
             }
                    
-             btnDelete.addEventListener("click",function(e){
-                    if(isSelected()){
-                        var confirm = document.getElementById("wimage-modal-confirm");
-                        confirm.addEventListener("click",function(e){            
-                            var data = e.target;
-                            if(data.id === "wimage-delete-agree"){
-                                deleteSelected();
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
+            btnDelete.addEventListener("click",function(e){
+                if(isSelected()){
+                    var confirm = document.getElementById("wimage-modal-delete-confirm");
+                    confirm.addEventListener("click",function(e){            
+                        var data = e.target;
+                        if(data.id === "wimage-delete-agree"){
+                            deleteSelected();
+                        }
+                    });
+                }else{
+                    disabled(e);
+                }
+            });
 
-                btnRename.addEventListener("click",function(e){
-                    var selected = document.getElementsByClassName("file-selected");
-                    if(selected.length === 1){
-                        var sameName = document.getElementById("wimage-rename-samename");
-                        sameName.style.visibility = "hidden";
-                        var target = selected[0];
-                        var name = target.lastChild.firstChild.nodeValue;
-                        var inputName = document.getElementById("nameValue");
-                        inputName.value = name;
-                        var confirm = document.getElementById("wimage-rename-agree");
-                        confirm.addEventListener("click",function(e){ 
-                            var tempSelected = document.getElementsByClassName("file-selected"); 
-                            var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
-                            var newName = inputName.value;
-                            if(isMatch(newName,"ellipsis")){
-                                if(newName !== tempName){
-                                    sameName.style.visibility = "visible";
-                                    e.stopPropagation();
-                                }                    
-                            }else{
-                                var tempNodeName = tempSelected[0].lastChild;
-                                tempNodeName.firstChild.nodeValue = newName;
-                                tempNodeName.setAttribute("title",newName);   
-                            }
-                        });
-                    }else{
-                        disabled(e);
-                    }
-                });
+            btnRename.addEventListener("click",function(e){
+                var selected = document.getElementsByClassName("file-selected");
+                if(selected.length === 1){
+                    var sameName = document.getElementById("wimage-rename-samename");
+                    sameName.style.visibility = "hidden";
+                    var target = selected[0];
+                    var name = target.lastChild.firstChild.nodeValue;
+                    var inputName = document.getElementById("nameValue");
+                    inputName.value = name;
+                    var confirm = document.getElementById("wimage-rename-agree");
+                    confirm.addEventListener("click",function(e){ 
+                        var tempSelected = document.getElementsByClassName("file-selected"); 
+                        var tempName = tempSelected[0].lastChild.firstChild.nodeValue;   
+                        var newName = inputName.value;
+                        if(isMatch(newName,"ellipsis")){
+                            if(newName !== tempName){
+                                sameName.style.visibility = "visible";
+                                e.stopPropagation();
+                            }                    
+                        }else{
+                            var tempNodeName = tempSelected[0].lastChild;
+                            tempNodeName.firstChild.nodeValue = newName;
+                            tempNodeName.setAttribute("title",newName);   
+                        }
+                    });
+                }else{
+                    disabled(e);
+                }
+            });
 
+            btnMove.addEventListener("click",function(e){
+                var selected = document.getElementsByClassName("file-selected");
+                if(selected.length === 1 && selected[0].classList.contains("wimage-item-image")){
+                    updateContentPopUpRename("wimage-item-folder");
+                    var btnMoveAgree = document.getElementById("wimage-move-agree");
+                    btnMoveAgree.addEventListener("click",function(e){
+                        var success = document.getElementById("wimage-notice");
+                        success.innerHTML = defaultsLang.moveSuccess;
+                        success.style.display = "block";
+                        success.style.opacity = "1";    
+                        setTimeout(function(){
+                            myFadeOut(success,20,true);
+                        },4000);
+                    });
+                }else{
+                    disabled(e);
+                }
+            });
         }
 
         editFile();
@@ -1680,10 +1798,22 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                         activeButton([btnDelete,btnMove,btnRename]);
                     });
                 }
-               
             });
+
+            var homeI = document.getElementsByClassName("wimage-path");
+            homeI = homeI[0].firstChild;
+            homeI.addEventListener("click",function(e){
+                var backPath = document.getElementById("wimage-back-path");
+                if(backPath){
+                    backPath.click();
+                }
+
+            });
+
         }
         folderXplore(); 
+
+
 
     })();
 

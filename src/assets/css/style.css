@@ -2266,19 +2266,19 @@ footer {
   -ms-user-select: none;
   user-select: none;
 }
-.wimage-file-group .wimage-thumbnail-group {
+.wimage-thumbnail-group {
   display: inline-block;
   position: relative;
   margin: 5px;
   overflow: hidden;
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper {
   width: 60px;
   height: 60px;
   position: relative;
   cursor: pointer;
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon {
   position: relative;
   width: 90%;
   height: 35px;
@@ -2294,7 +2294,7 @@ footer {
   -moz-box-shadow: 0 -8px 0 -5px #38F, 0 1px 4px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: 0 -8px 0 -5px #38F, 0 1px 4px rgba(0, 0, 0, 0.3);
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon:before {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon:before {
   content: '';
   position: absolute;
   top: -6px;
@@ -2304,7 +2304,7 @@ footer {
   border-radius: 2px;
   background: #38F;
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon:after {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper .folder-icon:after {
   content: attr(data-title);
   position: absolute;
   top: 0;
@@ -2313,7 +2313,7 @@ footer {
   bottom: 0;
   color: rgba(0, 0, 0, 0.5);
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper .wimageThumbnail {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper .wimageThumbnail {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -2324,21 +2324,36 @@ footer {
   border-right: solid 1px #E1E1E1;
   border-bottom: solid 1px #E1E1E1;
 }
-.wimage-file-group .wimage-thumbnail-group .ellipsis {
+.wimage-thumbnail-group .ellipsis {
   font-size: 10px;
   width: 60px;
   padding-top: 5px;
   text-align: center;
 }
-.wimage-file-group .wimage-thumbnail-group .wimage-thumbnail-wrapper-list {
+.wimage-thumbnail-group .wimage-thumbnail-wrapper-list {
   display: inline-block;
 }
-.wimage-file-group .wimage-thumbnail-group .list-name {
+.wimage-thumbnail-group .list-name {
   display: inline-block;
   margin-left: 10px;
   font-size: 1em;
   text-align: left;
   width: 200px;
+}
+#movePopup .modal-header h4 i {
+  font-size: 1.5em;
+}
+#movePopup .wimage-thumbnail-group {
+  cursor: pointer;
+}
+#movePopup .wimage-thumbnail-group:hover {
+  background: #F0F8FF;
+}
+#movePopup .selected-folder {
+  background: #00FFFF;
+}
+#movePopup .wimage-thumbnail-wrapper {
+  padding-left: 5px;
 }
 .file-selected {
   background-color: #E1E1E1;
@@ -2430,6 +2445,7 @@ rect {
 .wimage-path i {
   font-size: 1.3em;
   margin-left: 25px;
+  cursor: pointer;
 }
 .wimage-path span.wimage-back-slash {
   font-size: 1.3em;
@@ -2442,7 +2458,6 @@ rect {
   position: fixed;
   top: 30px;
   right: 100px;
-  margin-left: 100px;
   padding: 10px 10px 10px 30px;
   text-align: left;
 }
@@ -2451,6 +2466,14 @@ rect {
 }
 #wimage-error-upload span.non {
   font-weight: bold;
+}
+#wimage-notice {
+  display: none;
+  position: fixed;
+  top: 30px;
+  right: 100px;
+  padding: 15px;
+  text-align: center;
 }
 header {
   width: 100%;
