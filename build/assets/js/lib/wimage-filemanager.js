@@ -800,29 +800,30 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * -------------
         */
         function createFolder(id) {
-          "use strict";
-          var folderIcon = '<div class="folder-icon"></div>',
+            "use strict";
+            var folderIcon = '<div class="folder-icon"></div>',
               create = document.getElementById(id),
               fileCount = 0;
+
+            function fileName() { 
+                var nums = fileCount;
+                ++fileCount;
+                for(var i = 0 ; i <= nums ; i++){
+                    var folderName = "Album";
+                    folderName = (i === 0) ? folderName : folderName + " (" + i.toString() + ")";
+                    
+                    if(!isMatch(folderName,"ellipsis")){
+                        return folderName;
+                    }
+                }
+                return fileName();
+            } 
 
           //create element when click the button.
           create.addEventListener('click', function(e) {
             "use strict";
             disabled(e);
             if(!create.classList.contains("disabled")){
-                function fileName() {
-                    
-                    var fileUp = fileCount++;
-                    var nums = fileCount;
-
-                    for(var i = 0 ; i < nums ; i++){
-                        var folderName = "Album";
-                        folderName = (i === 0) ? folderName : folderName + " (" + i.toString() + ")";
-                        if(!isMatch(folderName,"ellipsis")){
-                            return folderName;
-                        }
-                    }
-                } 
 
                 var grid = document.getElementById("wimage-btn-grid");
                 var listView = {img: "",name: ""};
