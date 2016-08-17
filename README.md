@@ -1,7 +1,7 @@
 # Wimage filemanager UI 
 
 > This is a simple gallery filemanager UI (image file only) using Bootstrap 3.
-Please join with me if you have time.
+Have fun. Thank you for your feedback & issue report.
 
 ## Install and Use
 
@@ -44,22 +44,19 @@ Please join with me if you have time.
 - File size limit
 - Multiple right click context menu
 - Apply action in context menu 
-
-### Todos 
-- Data storage: JSON data sample.
-- upload files per time limit.
-- language path
-- ....more to come
+- Selectable: keyboard select.
+- File quantities per upload time limit.
+- Language path
 
 ### In progress 
-- Selectable: keyboard select.
+- Tree view for changeing folder
 
 ### Bugs
 - Drag select when scrolling can't select files, and drag zone being a square.
-- UX: When inside folder, just need one click on back to home.
 
 ## Changelogs/bugs fixed
 - Selected item not remove select when click/drag outside the item. --- fixed
+- UX: When inside folder, just need one click on back to home.
 
 # Authors 
 
