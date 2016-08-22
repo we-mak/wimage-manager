@@ -47,9 +47,10 @@ Have fun. Thank you for your feedback & issue report.
 - Selectable: keyboard select.
 - File quantities per upload time limit.
 - Language path
+- Tree view for changing folder
+- Slider preview
 
 ### In progress 
-- Tree view for changeing folder
 
 ### Bugs
 - Drag select when scrolling can't select files, and drag zone being a square.
