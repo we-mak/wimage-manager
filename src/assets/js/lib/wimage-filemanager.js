@@ -1049,30 +1049,36 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             }
         }
 
-        // Menu position
-        function positionMenu(e,menu) {
-            var clickCoords = getPosition(e);
-            var clickCoordsX = clickCoords.x;
-            var clickCoordsY = clickCoords.y;
+        function getPosition(e) {
+            var posx = 0;
+            var posy = 0;
 
-            var menuWidth = menu.main.offsetWidth + 4;
-            var menuHeight = menu.main.offsetHeight + 4;
+            if (!e) var e = window.event;
 
-            var windowWidth = window.innerWidth;
-            var windowHeight = window.innerHeight;
-
-            if ((windowWidth - clickCoords) < menuWidth) {
-              menu.main.style.left = windowWidth - menuWidth + "px";
-            } else {
-              menu.main.style.left = clickCoordsX + 'px';
+            if (e.pageX || e.pageY) {
+                posx = e.pageX;
+                posy = e.pageY;
+            } 
+            else if (e.clientX || e.clientY){
+                posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
             }
-
-            if ((windowHeight - clickCoordsY) < menuHeight) {
-              menu.main.style.top = windowHeight - menuHeight + "px";
-            } else {
-              menu.main.style.top = clickCoordsY + 'px';
+            return {
+                x: posx,
+                y: posy
             }
         }
+
+        // Menu position
+        function positionMenu(e,menu) {
+            menuPosition = getPosition(e);
+            menuPositionX = menuPosition.x + "px";
+            menuPositionY = menuPosition.y + "px";
+
+            menu.main.style.left = menuPositionX;
+            menu.main.style.top = menuPositionY;
+        }
+
           // Listen for item clicked
           // to do: apply function to context menu 
           // close menu after click 

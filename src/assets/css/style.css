@@ -2407,7 +2407,7 @@ rect {
 }
 .context-menu {
   position: absolute;
-  z-index: 10;
+  z-index: 999;
   display: none;
 }
 .context-menu li button {
