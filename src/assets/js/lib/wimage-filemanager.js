@@ -177,7 +177,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * -----------------
         */  
         
-             
+        
+
+        
         //Filter 
         // Looking for child element in depth
         function findChild(parent, child) {
@@ -243,7 +245,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
          * Create Popup menu
          */
 
-        function createPopup(id,contents,buttons) {
+        function createPopup(id,contents,buttons){
             var hugeModal = document.createElement("div");
             hugeModal.classList.add("modal");
             hugeModal.classList.add("fade");
@@ -260,7 +262,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             var bodyContent = document.createElement("div");
             bodyContent.classList.add("modal-body");
 
-            for(var i in contents) {
+            for(var i in contents){
                 var temp = document.createElement("p");
                 var text = document.createTextNode(contents[i]);
                 temp.appendChild(text);
@@ -271,7 +273,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             bodyFooter.classList.add("modal-footer");
             bodyFooter.id = "wimage-modal-delete-confirm";
 
-            for(var i in buttons) {
+            for(var i in buttons){
                 var temp = document.createElement("button");
                 temp.setAttribute("type","button");
                 temp.classList.add("btn");
@@ -293,7 +295,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return hugeModal;
         }
 
-        function createPopupRename(id,buttons) {
+        function createPopupRename(id,buttons){
             var hugeModal = document.createElement("div");
             hugeModal.classList.add("modal");
             hugeModal.classList.add("fade");
@@ -316,12 +318,12 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             bodyFooter.innerHTML = '<div class="col-md-4" id="wimage-rename-samename" style="visibility:'+ 'hidden' +'">The same name</div>';
             var tempDiv = document.createElement("div");
             tempDiv.classList.add('col-md-8');
-            for(var i in buttons) {
+            for(var i in buttons){
                 var temp = document.createElement("button");
                 temp.setAttribute("type","button");
                 temp.classList.add("btn");
                 temp.classList.add("btn-" + buttons[i].btn);
-                if(buttons[i].id) {
+                if(buttons[i].id){
                     temp.id = buttons[i].id;
                 }
                 temp.setAttribute("data-dismiss","modal");
@@ -338,7 +340,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return hugeModal;
         }
 
-        function createPopupMove(id,buttons,contentHeader,className) {
+        function createPopupMove(id,buttons,contentHeader,className){
             var hugeModal = document.createElement("div");
             hugeModal.classList.add("modal");
             hugeModal.classList.add("fade");
@@ -389,7 +391,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return hugeModal;
         }
 
-        function updateContentPopUpRename(className) {
+        function updateContentPopUpRename(className){
             var folders = document.getElementsByClassName(className);
             var length = folders.length;
             var bodyContent = document.getElementById("wimage-modal-move-content");
@@ -413,7 +415,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             }
         }
 
-        function isMatch(str,className) {
+        function isMatch(str,className){
             var allName = document.getElementsByClassName(className);
             var l = allName.length;
             for(var i = l ; i--;){
@@ -425,26 +427,26 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         }
 
         // thêm select class cho hình đc chọn
-        function addSelect(img) {
-            if(img.id !== "wimage-back-path") {
+        function addSelect(img){
+            if(img.id !== "wimage-back-path"){
                 img.classList.add("file-selected");
             }   
         }
 
         // remove
-        function removeSelect(img) {
+        function removeSelect(img){
             img.classList.remove("file-selected");
         }
 
          //stop event
-        function disabled(e) {
+        function disabled(e){
             e = (e) ? e : window.event;
             e.preventDefault();
             e.stopPropagation();
         }
 
         // có ít nhất 1 file dc chọn
-        function isSelected() {
+        function isSelected(){
             var temp = document.getElementsByClassName("file-selected");
             if(temp.length === 0){
                 return false;
@@ -453,41 +455,41 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         }
 
         // active các nút delete move rename nếu có ít nhất 1 file đc chọn
-        function activeButton(btn) {
+        function activeButton(btn){
             var selected = document.getElementsByClassName("file-selected");
             var l = selected.length;
             if(l){
-                for(var i in btn) {
+                for(var i in btn){
                     btn[i].classList.remove("disabled");
                 } 
             }else{
-                 for(var i in btn) {
+                 for(var i in btn){
                     btn[i].classList.add("disabled");
                 }
             }
-            if(l === 1) {
+            if(l === 1){
                 document.getElementById("wimage-btn-rename").classList.remove("disabled");
                 selected = selected[0];
                 if(selected.classList.contains("wimage-item-folder")){
                     document.getElementById("wimage-btn-move").classList.add("disabled");
                 }
-            }else {
+            }else{
                  document.getElementById("wimage-btn-rename").classList.add("disabled");
             }         
         }
 
-        function findSelected(target) {
+        function findSelected(target){
             var classList = target.classList;
             if(classList.contains("wimageThumbnail") || classList.contains("folder-icon")){
                 return target.parentNode.parentNode;
             }
-            if(classList.contains("ellipsis")) {
+            if(classList.contains("ellipsis")){
                 return target.parentNode;
             }
-            if(classList.contains("wimage-thumbnail-wrapper")) {
+            if(classList.contains("wimage-thumbnail-wrapper")){
                 return target.parentNode;
             }
-            if(classList.contains("wimage-thumbnail-group")) {
+            if(classList.contains("wimage-thumbnail-group")){
                 return target;
             }
             return null;
@@ -499,27 +501,27 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         
         function triggerEvent(el,eventName){
             var event;
-            if(document.createEvent) {
+            if(document.createEvent){
                 event = document.createEvent('HTMLEvents');
                 event.initEvent(eventName,true,true);
-            }else if(document.createEventObject) {// IE < 9
+            }else if(document.createEventObject){// IE < 9
                 event = document.createEventObject();
                 event.eventType = eventName;
             }
             event.eventName = eventName;
-            if(el.dispatchEvent) {
+            if(el.dispatchEvent){
                 el.dispatchEvent(event);
             }else if(el.fireEvent && htmlEvents['on'+eventName]){// IE < 9
                 el.fireEvent('on'+event.eventType,event);// can trigger only real event (e.g. 'click')
-            }else if(el[eventName]) {
+            }else if(el[eventName]){
                 el[eventName]();
-            }else if(el['on'+eventName]) {
+            }else if(el['on'+eventName]){
                 el['on'+eventName]();
             }
         }
 
 
-        function myFadeOut(obj,time,flag) {
+        function myFadeOut(obj,time,flag){
             var style = getComputedStyle(obj);
             var tempOpacity = style.opacity;
             tempOpacity -= 0.05;
@@ -622,10 +624,10 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
           }
 
           // validate is image and limit mime type
-          function validateType(file,mimes) {
+          function validateType(file,mimes){
             var valid = file.type.match("image.*");
             if(valid){
-              if(mimes === "") {
+              if(mimes === ""){
                 return true;
               }
               var mime = valid.input;
@@ -638,19 +640,19 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return false;
           }
 
-          function getSize(size) {
-            if(size) {
+          function getSize(size){
+            if(size){
               var tail = size.substr(-2,2);
               tail = tail.toLowerCase();
               var temp = size.substr(0,size.length - 2);
               var tempSize = parseInt(temp);
-              switch(tail) {
-                case "kb": {
+              switch(tail){
+                case "kb":{
                   return temp*1024;
-                } break;
+                }break;
                 case "mb":{
                   return temp*1024*1024;
-                } break;
+                }break;
                 default:
                   return 1024*1024;
               }
@@ -658,12 +660,12 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             return 1024*1024;
           }
 
-          function validateSize(file,size) {
+          function validateSize(file,size){
             return (file.size <= size);
           }
 
-            function setName(str,className) {
-                if(isMatch(str,className)) {
+            function setName(str,className){
+                if(isMatch(str,className)){
                     var temp = str.split(".");
                     var mime = temp.pop();
                     var pureName = temp.join("");
@@ -690,7 +692,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 var grid = document.getElementById("wimage-btn-grid");
                 var listView = {img: "",name: ""};
                 var display = "";
-                if(!grid.classList.contains("active")) {
+                if(!grid.classList.contains("active")){
                     listView = {img: " wimage-thumbnail-wrapper-list",name: " list-name"};
                     display = ' style="display: block;"';
                 }
@@ -858,28 +860,28 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         function contextMenu() {
           
 
-        var menuStart = '<menu class="context-menu dropdown-menu" ';
-        var menuEnd = '</menu>';
-        var lineStart = '<li class="context-menu-item"><button class="context-menu-item-button"';
-        var lineMid = '>';
-        var lineEnd = '</button></li>';
+            var menuStart = '<menu class="context-menu dropdown-menu" ';
+            var menuEnd = '</menu>';
+            var lineStart = '<li class="context-menu-item"><button class="context-menu-item-button"';
+            var lineMid = '>';
+            var lineEnd = '</button></li>';
 
-        document.write(menuStart + 'id="contextMenu">' + 
-                        lineStart + 'value="createFolder"' + lineMid + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + lineEnd + 
-                        lineStart + 'value="upload"' + lineMid + cMenuIcons.default.upload + cMenuTitle.default.upload + lineEnd + 
-                        menuEnd);
-        document.write(menuStart + 'id="contextMenuImage">' +  
-                        lineStart + 'value="preview"' + lineMid + cMenuIcons.image.preview + cMenuTitle.image.preview + lineEnd + 
-                        lineStart + 'value="editName"' + lineMid + cMenuIcons.image.editName + cMenuTitle.image.editName + lineEnd +
-                        lineStart + 'value="changeFolder"' + lineMid + cMenuIcons.image.changeFolder + cMenuTitle.image.changeFolder + lineEnd + 
-                        lineStart + 'value="deleteImage"' + lineMid + cMenuIcons.image.del + cMenuTitle.image.del + lineEnd + 
-                        menuEnd);
+            document.write(menuStart + 'id="contextMenu">' + 
+                            lineStart + 'value="createFolder"' + lineMid + cMenuIcons.default.createFolder + cMenuTitle.default.createFolder + lineEnd + 
+                            lineStart + 'value="upload"' + lineMid + cMenuIcons.default.upload + cMenuTitle.default.upload + lineEnd + 
+                            menuEnd);
+            document.write(menuStart + 'id="contextMenuImage">' +  
+                            lineStart + 'value="preview"' + lineMid + cMenuIcons.image.preview + cMenuTitle.image.preview + lineEnd + 
+                            lineStart + 'value="editName"' + lineMid + cMenuIcons.image.editName + cMenuTitle.image.editName + lineEnd +
+                            lineStart + 'value="changeFolder"' + lineMid + cMenuIcons.image.changeFolder + cMenuTitle.image.changeFolder + lineEnd + 
+                            lineStart + 'value="deleteImage"' + lineMid + cMenuIcons.image.del + cMenuTitle.image.del + lineEnd + 
+                            menuEnd);
 
-        document.write(menuStart + 'id="contextMenuFolder">' +  
-                        lineStart + 'value="explore"' + lineMid + cMenuIcons.folder.explore + cMenuTitle.folder.explore + lineEnd + 
-                        lineStart + 'value="editName"' + lineMid + cMenuIcons.folder.editName + cMenuTitle.folder.editName + lineEnd +
-                        lineStart + 'value="deleteFolder"' + lineMid + cMenuIcons.folder.del + cMenuTitle.folder.del + lineEnd + 
-                        menuEnd);
+            document.write(menuStart + 'id="contextMenuFolder">' +  
+                            lineStart + 'value="explore"' + lineMid + cMenuIcons.folder.explore + cMenuTitle.folder.explore + lineEnd + 
+                            lineStart + 'value="editName"' + lineMid + cMenuIcons.folder.editName + cMenuTitle.folder.editName + lineEnd +
+                            lineStart + 'value="deleteFolder"' + lineMid + cMenuIcons.folder.del + cMenuTitle.folder.del + lineEnd + 
+                            menuEnd);
 
         var taskItemClassName = "wimage-content", 
             taskItemInContext;
@@ -1076,7 +1078,6 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
             menu.main.style.left = menuPositionX;
             menu.main.style.top = menuPositionY;
         }
-
           // Listen for item clicked
           // to do: apply function to context menu 
           // close menu after click 
@@ -1584,6 +1585,10 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         selectFile();
 
+        
+  
+
+
 
         /*
         * -------------
@@ -1764,6 +1769,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
         * --------------------
         */
         function folderXplore() {
+
             function createBackImage(src){
                 var content = "<span>";
                 content += '<div class="wimage-thumbnail-group" id="wimage-back-path"><div class="wimage-thumbnail-wrapper"><img class="wimageThumbnail wimage-thumbnail-back" src="';
@@ -1799,6 +1805,9 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
                 }
                 var backPath = document.getElementById("wimage-back-path");
                 if(backPath){
+                    // backPath.addEventListener("click",function(e){
+                    //     disabled(e); 
+                    // });
                     backPath.addEventListener("click",function(e){
                         disabled(e);
                         output.innerHTML = null;
@@ -1824,6 +1833,8 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
 
         }
         folderXplore(); 
+
+
 
     })();
 
