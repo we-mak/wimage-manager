@@ -1,5 +1,7 @@
 # Wimage filemanager UI 
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/we-mak/wimage-manager.svg)](https://greenkeeper.io/)
+
 > This is a simple gallery filemanager UI (image file only) using Bootstrap 3.
 Have fun. Thank you for your feedback & issue report.
 
