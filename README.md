@@ -1,5 +1,7 @@
 # Wimage filemanager UI 
 
+**Warning: This project is deprecated**
+
 > This is a simple gallery filemanager UI (image file only) using Bootstrap 3.
 Have fun. Thank you for your feedback & issue report.
 
